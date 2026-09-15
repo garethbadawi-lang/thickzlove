@@ -5,14 +5,14 @@ import { ContactPanel } from "@/components/ContactPanel";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Contact Miss Juicy Staxxx for general questions, collaboration or booking assistance.",
+    "Contact Love Z Thick for general questions, collaboration or booking assistance.",
 };
 
 export default function ContactPage() {
   return (
     <>
       <PageIntro
-        heading="Contact Miss Juicy"
+        heading="Contact Love Z Thick"
         scriptSubtitle="A private word, carefully received."
       >
         <p>

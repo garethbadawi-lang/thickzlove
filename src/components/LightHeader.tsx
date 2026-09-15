@@ -6,8 +6,12 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { mainNav } from "@/data/navigation";
 import { siteConfig } from "@/data/site-config";
-import { cn } from "@/lib/utils";
+import { cn, externalRel } from "@/lib/utils";
 import { MobileNavigation } from "./MobileNavigation";
+
+function isExternal(href: string) {
+  return href.startsWith("http://") || href.startsWith("https://");
+}
 
 export function LightHeader() {
   const pathname = usePathname();
@@ -74,12 +78,23 @@ export function LightHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link
-              href={siteConfig.mainCta.href}
-              className="btn-primary hidden sm:inline-flex"
-            >
-              {siteConfig.mainCta.label}
-            </Link>
+            {isExternal(siteConfig.mainCta.href) ? (
+              <a
+                href={siteConfig.mainCta.href}
+                target="_blank"
+                rel={externalRel()}
+                className="btn-primary hidden sm:inline-flex"
+              >
+                {siteConfig.mainCta.label}
+              </a>
+            ) : (
+              <Link
+                href={siteConfig.mainCta.href}
+                className="btn-primary hidden sm:inline-flex"
+              >
+                {siteConfig.mainCta.label}
+              </Link>
+            )}
             <button
               type="button"
               className="inline-flex size-11 items-center justify-center rounded-full border border-border bg-white text-espresso lg:hidden"

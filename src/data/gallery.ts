@@ -31,13 +31,13 @@ export const galleryCopy = {
   scriptSubtitle: "A glimpse into my world.",
 } as const;
 
-/** Placeholder editorial images — replace with creator-owned photographs. */
+/** Placeholder images — replace with Love Z Thick photographs. */
 export const galleryImages: GalleryImage[] = [
   {
     id: "g1",
     title: "Portrait study",
-    alt: "Editorial portrait placeholder",
-    src: "/images/portrait-placeholder.svg",
+    alt: "Love Z Thick portrait",
+    src: "/images/love-z-thick-gallery-01.svg",
     category: "Portraits",
     orientation: "portrait",
     displayOrder: 1,
@@ -47,8 +47,8 @@ export const galleryImages: GalleryImage[] = [
   {
     id: "g2",
     title: "Evening light",
-    alt: "Evening editorial placeholder",
-    src: "/images/og-share.svg",
+    alt: "Love Z Thick",
+    src: "/images/love-z-thick-gallery-02.svg",
     category: "Evening",
     orientation: "landscape",
     displayOrder: 2,
@@ -58,8 +58,8 @@ export const galleryImages: GalleryImage[] = [
   {
     id: "g3",
     title: "Lifestyle moment",
-    alt: "Lifestyle editorial placeholder",
-    src: "/images/portrait-placeholder.svg",
+    alt: "Love Z Thick portrait",
+    src: "/images/love-z-thick-gallery-03.svg",
     category: "Lifestyle",
     orientation: "portrait",
     displayOrder: 3,
@@ -69,8 +69,8 @@ export const galleryImages: GalleryImage[] = [
   {
     id: "g4",
     title: "Travel mood",
-    alt: "Travel editorial placeholder",
-    src: "/images/og-share.svg",
+    alt: "Love Z Thick",
+    src: "/images/love-z-thick-gallery-04.svg",
     category: "Travel",
     orientation: "landscape",
     displayOrder: 4,
@@ -80,8 +80,8 @@ export const galleryImages: GalleryImage[] = [
   {
     id: "g5",
     title: "Editorial frame",
-    alt: "Editorial gallery placeholder",
-    src: "/images/portrait-placeholder.svg",
+    alt: "Love Z Thick portrait",
+    src: "/images/love-z-thick-gallery-05.svg",
     category: "Editorial",
     orientation: "portrait",
     displayOrder: 5,
@@ -91,8 +91,8 @@ export const galleryImages: GalleryImage[] = [
   {
     id: "g6",
     title: "Soft portrait",
-    alt: "Soft portrait placeholder",
-    src: "/images/portrait-placeholder.svg",
+    alt: "Love Z Thick portrait",
+    src: "/images/love-z-thick-gallery-06.svg",
     category: "Portraits",
     orientation: "square",
     displayOrder: 6,

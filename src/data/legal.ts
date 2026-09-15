@@ -15,7 +15,7 @@ export const legalContent = {
       },
       {
         heading: "No Guarantee of Acceptance",
-        body: "Submitting an enquiry does not confirm a booking. Miss Juicy Staxxx may decline any request without providing a reason.",
+        body: "Submitting an enquiry does not confirm a booking. Love Z Thick may decline any request without providing a reason.",
       },
       {
         heading: "Screening and Verification",
@@ -27,7 +27,7 @@ export const legalContent = {
       },
       {
         heading: "Intellectual Property",
-        body: "All branding, text, layout, graphics and original content on this website belong to Miss Juicy Staxxx unless otherwise stated.",
+        body: "All branding, text, layout, graphics and original content on this website belong to Love Z Thick unless otherwise stated.",
       },
       {
         heading: "Prohibited Conduct",
@@ -35,7 +35,7 @@ export const legalContent = {
       },
       {
         heading: "Limitation of Liability",
-        body: "To the fullest extent permitted by law, Miss Juicy Staxxx and any associated operators shall not be liable for indirect, incidental, consequential or special damages arising from use of this website.",
+        body: "To the fullest extent permitted by law, Love Z Thick and any associated operators shall not be liable for indirect, incidental, consequential or special damages arising from use of this website.",
       },
       {
         heading: "Contact",
@@ -51,7 +51,7 @@ export const legalContent = {
     sections: [
       {
         heading: "Overview",
-        body: "This Privacy Policy describes how information may be collected when you visit the Miss Juicy Staxxx website or submit an enquiry. The site is designed to minimise data collection.",
+        body: "This Privacy Policy describes how information may be collected when you visit the Love Z Thick website or submit an enquiry. The site is designed to minimise data collection.",
       },
       {
         heading: "Enquiry Information",

@@ -7,7 +7,7 @@ import { siteConfig } from "@/data/site-config";
 export const metadata: Metadata = {
   title: "Request a Booking",
   description:
-    "Submit a booking enquiry with Miss Juicy Staxxx. Submitting a request does not confirm a booking.",
+    "Submit a booking enquiry with Love Z Thick. Submitting a request does not confirm a booking.",
 };
 
 export default function BookingPage() {

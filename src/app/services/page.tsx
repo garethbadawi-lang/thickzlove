@@ -8,7 +8,7 @@ import { servicesPageCopy } from "@/data/services";
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Companion services with Miss Juicy Staxxx — dinners, events, travel and digital experiences. Starting rates for time and companionship only.",
+    "Services and experiences with Love Z Thick. Starting rates shown for arranged time and experiences only.",
 };
 
 export default function ServicesPage() {

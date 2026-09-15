@@ -24,7 +24,7 @@ export const servicesPageCopy = {
     "Prices may vary for late-night, extended or travel arrangements.",
     "Gifts do not reduce the agreed booking fee.",
     "No booking is confirmed until written confirmation is provided.",
-    "Miss Juicy Staxxx may decline any request.",
+    "Love Z Thick may decline any request.",
   ],
 } as const;
 

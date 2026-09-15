@@ -75,7 +75,7 @@ export const faqs: FaqItem[] = [
     id: "outfit",
     question: "Can I choose an outfit?",
     answer:
-      "Dress preferences may be discussed during planning. Final presentation remains within Miss Juicy Staxxx’s personal style and the occasion’s requirements.",
+      "Dress preferences may be discussed during planning. Final presentation remains within Love Z Thick’s personal style and the occasion’s requirements.",
     enabled: true,
     displayOrder: 9,
   },
@@ -107,7 +107,7 @@ export const faqs: FaqItem[] = [
     id: "accepted",
     question: "Are all requests accepted?",
     answer:
-      "No. Every request is subject to approval. Miss Juicy Staxxx may decline any request without providing a reason.",
+      "No. Every request is subject to approval. Love Z Thick may decline any request without providing a reason.",
     enabled: true,
     displayOrder: 13,
   },

@@ -5,7 +5,7 @@ import { galleryCopy } from "@/data/gallery";
 
 export const metadata: Metadata = {
   title: "Gallery",
-  description: "Editorial gallery of Miss Juicy Staxxx.",
+  description: "Editorial gallery of Love Z Thick.",
 };
 
 export default function GalleryPage() {

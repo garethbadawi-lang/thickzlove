@@ -1,67 +1,66 @@
 /**
- * Central site configuration for Miss Juicy Staxxx.
+ * Central site configuration for Love Z Thick.
  */
 
 export const siteConfig = {
-  name: "Miss Juicy Staxxx",
-  shortName: "Miss Juicy",
-  username: "@missjuicystaxxx",
-  handle: "missjuicystaxxx",
-  monogram: "MJS",
-  tagline: "Independent Luxury Companion",
-  heroHeading: "Time Beautifully Spent",
-  heroScript: "A little time away from the ordinary.",
+  name: "Love Z Thick",
+  shortName: "Love Z Thick",
+  username: "@ZLOVE_theGOAT",
+  handle: "ZLOVE_theGOAT",
+  monogram: "LZT",
+  location: "Atlanta, GA",
+  tagline: "Adult Entertainer • Video Vixen • Dancer • Content Creator",
+  heroHeading: "18+ Only",
+  heroScript: "Love Z Thick ❤️ ✨ 🍫",
   heroDescription:
-    "Elegant companionship for dinners, events, travel and memorable moments. Miss Juicy Staxxx offers a warm, discreet and thoughtfully arranged experience for respectful adults.",
+    "Atlanta-based adult entertainer, video vixen, dancer and content creator. Explore her official socials and latest content.",
   description:
-    "Independent luxury companion offering lawful social companionship and carefully arranged digital experiences.",
+    "Official website for Love Z Thick — Atlanta-based adult entertainer, video vixen, dancer and content creator.",
   companionshipDisclaimer:
-    "All rates are for time, social companionship and the stated experience only. No sexual service is offered, promised or implied. Every arrangement is subject to approval, screening, availability and agreed boundaries.",
+    "This website is for adults only (18+). Official content and contact channels are listed on this site. Do not send payments or personal documents to unofficial accounts.",
   about: {
-    heading: "Meet Miss Juicy Staxxx",
-    scriptSubtitle: "Confident, composed and unforgettable.",
+    heading: "Meet Love Z Thick",
+    scriptSubtitle: "Atlanta, GA",
     paragraphs: [
-      "Miss Juicy Staxxx is an independent luxury companion known for her warm presence, polished style and ability to make every occasion feel effortless. She enjoys thoughtful conversation, elegant surroundings and meeting respectful adults who value privacy and good company.",
-      "Whether accompanying you to dinner, an event or a planned journey, each arrangement is approached with care, discretion and attention to detail.",
+      "Love Z Thick is an Atlanta-based adult entertainer, video vixen, dancer and content creator. Follow her socials and explore her latest content through her official links.",
     ],
-    personality: "Warm, composed, engaging and selective.",
+    personality: "Adult entertainer, video vixen, dancer and content creator.",
     idealArrangements:
-      "Dinners, events, travel companionship and thoughtfully planned social occasions.",
-    favouriteSettings:
-      "Fine dining, hotel lounges, cultural events, private celebrations and elegant city evenings.",
-    interests: "Conversation, travel, fashion, music and memorable atmospheres.",
-    dressStyle: "Polished evening wear, tailored day looks and occasion-appropriate elegance.",
-    travelPreferences: "Advance planning, respectful itineraries and comfortable public settings.",
-    languages: "English",
-    generalAvailability: "By enquiry — see the Availability page for indicative dates.",
+      "Official content, social updates and fan connections through her verified links.",
+    favouriteSettings: "Atlanta, GA",
+    interests: "Entertainment, dance, video and content creation.",
+    dressStyle: "As featured in her public content and appearances.",
+    travelPreferences: "Based in Atlanta, GA.",
+    languages: "Public communications in English.",
+    generalAvailability: "Updates and content shared through her official links.",
   },
-  profileImage: "/images/portrait-placeholder.svg",
-  heroImage: "/images/portrait-placeholder.svg",
-  ogImage: "/images/og-share.svg",
+  profileImage: "/images/love-z-thick-hero.png",
+  heroImage: "/images/love-z-thick-hero.png",
+  ogImage: "/images/love-z-thick-og.svg",
   ageGate: {
     enabled: true,
-    eyebrow: "ADULTS ONLY",
-    title: "Miss Juicy Staxxx",
+    eyebrow: "18+ ONLY",
+    title: "Love Z Thick",
     message:
       "This website is intended for adults. Please confirm that you meet the minimum legal age required in your location before continuing.",
     disclaimer:
-      "Arrangements are for lawful social companionship only. No sexual service is offered or implied.",
+      "Adult content and entertainment. Official links only — 18+ ONLY.",
     confirmLabel: "Enter",
     exitLabel: "Exit",
     exitUrl: "https://www.google.com",
-    storageKey: "missjuicystaxxx-age-confirmed",
+    storageKey: "lovezthick-age-confirmed",
   },
   announcement: {
     enabled: false,
     text: "",
   },
   mainCta: {
-    label: "Request a Booking",
-    href: "/booking",
+    label: "Exclusive Content",
+    href: "https://onlyfans.com/Thickzlove912",
   },
   secondaryCta: {
-    label: "Explore My Services",
-    href: "/services",
+    label: "Follow on X",
+    href: "https://x.com/ZLOVE_theGOAT",
   },
   contact: {
     formEnabled: true,
@@ -84,18 +83,18 @@ export const siteConfig = {
   },
   seo: {
     noindex: false,
-    title: "Miss Juicy Staxxx | Independent Luxury Companion",
+    title: "Love Z Thick | Official Website",
     description:
-      "Elegant companionship for dinners, events, travel and memorable moments. Lawful social arrangements with Miss Juicy Staxxx.",
-    ogTitle: "Miss Juicy Staxxx",
+      "Official website for Love Z Thick — Atlanta-based adult entertainer, video vixen, dancer and content creator. Explore her official socials and content.",
+    ogTitle: "Love Z Thick | Official Website",
     ogDescription:
-      "Independent luxury companion — elegant, discreet and thoughtfully arranged.",
-    siteUrl: "https://missjuicystaxxx.com",
+      "Atlanta-based adult entertainer, video vixen, dancer and content creator. Explore her official socials and content.",
+    siteUrl: "https://thickzlove.com",
     locale: "en_US",
   },
   footer: {
-    message: "Independent luxury companion for respectful adults.",
-    copyright: `© ${new Date().getFullYear()} Miss Juicy Staxxx. All rights reserved.`,
+    message: "Atlanta-based adult entertainer, video vixen, dancer and content creator. 18+ Only.",
+    copyright: `© ${new Date().getFullYear()} Love Z Thick. All rights reserved.`,
     trademark:
       "All third-party platform names belong to their respective owners.",
   },

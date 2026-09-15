@@ -40,11 +40,12 @@ export const metadata: Metadata = {
   authors: [{ name: siteConfig.name }],
   creator: siteConfig.name,
   keywords: [
-    "Miss Juicy Staxxx",
-    "missjuicystaxxx",
-    "luxury companion",
-    "social companionship",
-    "independent companion",
+    "Love Z Thick",
+    "ZLOVE_theGOAT",
+    "Thickzlove912",
+    "adult entertainer",
+    "content creator",
+    "Atlanta",
   ],
   robots: siteConfig.seo.noindex
     ? { index: false, follow: false }
@@ -61,7 +62,7 @@ export const metadata: Metadata = {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: `${siteConfig.name} — Independent Luxury Companion`,
+        alt: `${siteConfig.name} — Official Website`,
       },
     ],
   },

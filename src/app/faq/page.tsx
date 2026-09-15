@@ -5,7 +5,7 @@ import { siteConfig } from "@/data/site-config";
 
 export const metadata: Metadata = {
   title: "FAQ",
-  description: "Frequently asked questions about booking with Miss Juicy Staxxx.",
+  description: "Frequently asked questions about booking with Love Z Thick.",
 };
 
 export default function FAQPage() {

@@ -21,12 +21,12 @@ export default function HomePage() {
         <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20">
           <p className="text-eyebrow">Introduction</p>
           <h2 className="mt-3 font-display text-3xl text-espresso sm:text-4xl">
-            A Refined Companion Experience
+            Atlanta-Based Creator
           </h2>
           <p className="mt-5 text-base leading-relaxed text-warmgrey sm:text-lg">
-            Whether you are attending an important event, enjoying dinner in the
-            city or simply looking for engaging company, each arrangement is
-            approached with care, discretion and attention to detail.
+            Love Z Thick is an Atlanta-based adult entertainer, video vixen,
+            dancer and content creator. Follow her socials and explore her
+            latest content through her official links.
           </p>
         </div>
       </section>

@@ -6,7 +6,7 @@ import { availabilityCopy } from "@/data/availability";
 export const metadata: Metadata = {
   title: "Availability",
   description:
-    "View indicative availability and continue to a booking enquiry with Miss Juicy Staxxx.",
+    "View indicative availability and continue to a booking enquiry with Love Z Thick.",
 };
 
 export default function AvailabilityPage() {

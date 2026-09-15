@@ -4,11 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { mainNav } from "@/data/navigation";
 import { siteConfig } from "@/data/site-config";
-import { cn } from "@/lib/utils";
+import { cn, externalRel } from "@/lib/utils";
 
 interface MobileNavigationProps {
   open: boolean;
   onClose: () => void;
+}
+
+function isExternal(href: string) {
+  return href.startsWith("http://") || href.startsWith("https://");
 }
 
 export function MobileNavigation({ open, onClose }: MobileNavigationProps) {
@@ -63,13 +67,25 @@ export function MobileNavigation({ open, onClose }: MobileNavigationProps) {
         </nav>
 
         <div className="border-t border-border p-4">
-          <Link
-            href={siteConfig.mainCta.href}
-            onClick={onClose}
-            className="btn-primary w-full"
-          >
-            {siteConfig.mainCta.label}
-          </Link>
+          {isExternal(siteConfig.mainCta.href) ? (
+            <a
+              href={siteConfig.mainCta.href}
+              target="_blank"
+              rel={externalRel()}
+              onClick={onClose}
+              className="btn-primary w-full"
+            >
+              {siteConfig.mainCta.label}
+            </a>
+          ) : (
+            <Link
+              href={siteConfig.mainCta.href}
+              onClick={onClose}
+              className="btn-primary w-full"
+            >
+              {siteConfig.mainCta.label}
+            </Link>
+          )}
         </div>
       </aside>
     </>

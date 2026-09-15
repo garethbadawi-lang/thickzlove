@@ -21,5 +21,5 @@ export function formatDisplayDate(iso: string) {
 export function createReferenceNumber() {
   const stamp = Date.now().toString(36).toUpperCase();
   const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `MJS-${stamp}-${rand}`;
+  return `LZT-${stamp}-${rand}`;
 }

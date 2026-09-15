@@ -66,6 +66,14 @@
     @apply inline-flex min-h-11 items-center justify-center gap-2 text-sm font-semibold text-burgundy transition hover:underline underline-offset-4;
   }
 
+  .link-tile {
+    @apply flex h-10 w-full items-center gap-2 rounded-[10px] border border-burgundy/30 bg-champagne px-3.5 text-[12px] font-medium tracking-wide text-burgundy shadow-[0_2px_8px_rgba(42,33,30,0.05)] transition duration-200 ease-out sm:h-11 sm:text-[13px];
+  }
+
+  .link-tile:hover {
+    @apply -translate-y-0.5 border-burgundy bg-burgundy text-ivory shadow-[0_8px_18px_rgba(114,43,58,0.2)];
+  }
+
   .card-light {
     @apply rounded-[18px] border border-border bg-white shadow-[var(--shadow-soft)];
   }

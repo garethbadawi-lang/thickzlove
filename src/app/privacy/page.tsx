@@ -4,7 +4,7 @@ import { legalContent } from "@/data/legal";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy policy for the official Miss Juicy Staxxx website.",
+  description: "Privacy policy for the official Love Z Thick website.",
 };
 
 export default function PrivacyPage() {

@@ -4,7 +4,7 @@ import { legalContent } from "@/data/legal";
 
 export const metadata: Metadata = {
   title: "Terms of Use",
-  description: "Terms of use for the official Miss Juicy Staxxx website.",
+  description: "Terms of use for the official Love Z Thick website.",
 };
 
 export default function TermsPage() {

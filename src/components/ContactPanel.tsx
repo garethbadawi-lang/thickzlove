@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { siteConfig } from "@/data/site-config";
 import { getEnabledSocials } from "@/data/socials";
 import { externalRel } from "@/lib/utils";
@@ -65,9 +64,14 @@ export function ContactPanel() {
         </p>
 
         <div className="mt-8 space-y-4">
-          <Link href="/booking" className="btn-primary inline-flex">
-            Request a Booking
-          </Link>
+          <a
+            href={siteConfig.mainCta.href}
+            target="_blank"
+            rel={externalRel()}
+            className="btn-primary inline-flex"
+          >
+            {siteConfig.mainCta.label}
+          </a>
           {socials.length > 0 ? (
             <ul className="space-y-2">
               {socials.map((s) => (
@@ -94,8 +98,8 @@ export function ContactPanel() {
           <p className="text-sm font-semibold text-espresso">Impersonator warning</p>
           <p className="mt-2 text-sm leading-relaxed text-warmgrey">
             Only trust contact methods listed on this website. Do not send
-            payments or personal documents to accounts claiming to be Miss Juicy
-            Staxxx without written confirmation through an official channel.
+            payments or personal documents to accounts claiming to be Love Z
+            Thick without written confirmation through an official channel.
           </p>
         </aside>
       </div>

@@ -6,7 +6,7 @@ import { etiquetteCopy, etiquetteSections } from "@/data/etiquette";
 export const metadata: Metadata = {
   title: "Etiquette",
   description:
-    "Etiquette and expectations for arrangements with Miss Juicy Staxxx.",
+    "Etiquette and expectations for arrangements with Love Z Thick.",
 };
 
 export default function EtiquettePage() {
