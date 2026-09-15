@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ivory: #fcf9f4;
+  --color-champagne: #f5eee5;
+  --color-white: #ffffff;
+  --color-espresso: #2a211e;
+  --color-warmgrey: #756b65;
+  --color-burgundy: #722b3a;
+  --color-rose: #b67882;
+  --color-gold: #b99762;
+  --color-blush: #eedadd;
+  --color-border: #e5ddd4;
+  --color-footer: #241d1a;
+  --color-available: #7a9a7e;
+  --color-muted: #a39a92;
+
+  --font-display: var(--font-bodoni), Georgia, "Times New Roman", serif;
+  --font-script: var(--font-parisienne), "Brush Script MT", cursive;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-soft: 0 18px 50px rgba(42, 33, 30, 0.08);
+  --radius-card: 18px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ivory text-espresso antialiased font-body;
+  }
+
+  ::selection {
+    @apply bg-blush text-espresso;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply outline-2 outline-offset-2 outline-gold;
+  }
+}
+
+@layer utilities {
+  .font-script {
+    font-family: var(--font-script);
+  }
+
+  .text-eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.22em] text-burgundy;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-burgundy px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-espresso;
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-white px-6 py-2.5 text-sm font-semibold text-espresso transition hover:border-gold hover:text-burgundy;
+  }
+
+  .btn-ghost {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 text-sm font-semibold text-burgundy transition hover:underline underline-offset-4;
+  }
+
+  .card-light {
+    @apply rounded-[18px] border border-border bg-white shadow-[var(--shadow-soft)];
+  }
+
+  .divider-gold {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-gold/50 to-transparent;
+  }
+
+  .input-light {
+    @apply w-full min-h-11 rounded-2xl border border-border bg-white px-4 py-2.5 text-sm text-espresso placeholder:text-muted transition focus:border-gold focus:outline-none;
+  }
+
+  .fade-in {
+    animation: fade-up 0.65s ease both;
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    .fade-in {
+      animation: none;
+    }
+  }
+}
