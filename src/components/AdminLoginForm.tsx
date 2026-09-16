@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { siteConfig } from "@/data/site-config";
 
@@ -79,6 +80,15 @@ export function AdminLoginForm() {
           required
         />
       </label>
+
+      <div className="text-right">
+        <Link
+          href="/admin/forgot-password"
+          className="text-sm text-burgundy underline-offset-2 hover:underline"
+        >
+          Forgot password?
+        </Link>
+      </div>
 
       {error && <p className="text-sm text-burgundy">{error}</p>}
 

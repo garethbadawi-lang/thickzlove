@@ -17,6 +17,16 @@ function eventLabel(entry: AdminAuditEntry): string {
       return "Logged out";
     case "ADMIN_SESSION_EXPIRED":
       return "Session expired";
+    case "PASSWORD_RESET_REQUESTED":
+      return "Password reset requested";
+    case "PASSWORD_CHANGED":
+      return "Password changed";
+    case "CLIENT_INVITED":
+      return entry.success ? "Client invited" : "Client invite failed";
+    case "PROFILE_COMPLETED":
+      return "Profile completed";
+    case "EMAIL_CHANGE_REQUESTED":
+      return "Email change requested";
     default:
       return entry.event;
   }

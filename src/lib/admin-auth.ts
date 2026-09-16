@@ -3,7 +3,11 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { isNeonAuthConfigured, auth } from "@/lib/auth/server";
-import { isUserAuthorizedForSite } from "@/lib/site-access";
+import {
+  getSiteAdminLink,
+  isProfileComplete,
+  type SiteAdminLink,
+} from "@/lib/site-access";
 import { SITE_KEY } from "@/lib/site";
 
 export const COOKIE_NAME = "lzt_admin_session";
@@ -19,12 +23,18 @@ export type AdminAccess =
       authUserId: string;
       siteKey: string;
       email?: string | null;
+      name?: string | null;
+      membership: SiteAdminLink;
+      profileComplete: boolean;
     }
   | {
       mode: "legacy";
       siteKey: string;
       authUserId?: undefined;
       email?: undefined;
+      name?: undefined;
+      membership?: undefined;
+      profileComplete: true;
     };
 
 function getSessionSecret(): string | null {
@@ -175,13 +185,16 @@ export async function getAdminAccess(): Promise<AdminAccess | null> {
       const { data: session } = await auth.getSession();
       const userId = session?.user?.id ? String(session.user.id) : null;
       if (userId) {
-        const allowed = await isUserAuthorizedForSite(userId, SITE_KEY);
-        if (allowed) {
+        const membership = await getSiteAdminLink(userId, SITE_KEY);
+        if (membership) {
           return {
             mode: "neon",
             authUserId: userId,
             siteKey: SITE_KEY,
             email: session?.user?.email ? String(session.user.email) : null,
+            name: session?.user?.name ? String(session.user.name) : null,
+            membership,
+            profileComplete: isProfileComplete(membership),
           };
         }
         // Authenticated elsewhere but not linked to this site → deny Neon path.
@@ -193,7 +206,7 @@ export async function getAdminAccess(): Promise<AdminAccess | null> {
 
   const jar = await cookies();
   if (isValidAdminToken(jar.get(COOKIE_NAME)?.value)) {
-    return { mode: "legacy", siteKey: SITE_KEY };
+    return { mode: "legacy", siteKey: SITE_KEY, profileComplete: true };
   }
 
   return null;
@@ -204,10 +217,23 @@ export async function isAdminAuthenticated(): Promise<boolean> {
 }
 
 /** Server Components / layouts: redirect to login when unauthenticated. */
-export async function requireAdminSession(): Promise<void> {
-  if (!(await isAdminAuthenticated())) {
+export async function requireAdminSession(options?: {
+  allowIncompleteProfile?: boolean;
+}): Promise<AdminAccess> {
+  const access = await getAdminAccess();
+  if (!access) {
     redirect("/admin/login");
   }
+
+  if (
+    access.mode === "neon" &&
+    !access.profileComplete &&
+    !options?.allowIncompleteProfile
+  ) {
+    redirect("/admin/account/setup");
+  }
+
+  return access;
 }
 
 export function getAdminCookieOptions(maxAge = SESSION_MAX_AGE_SEC) {

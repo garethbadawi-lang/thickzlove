@@ -8,6 +8,7 @@ export default async function AdminProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Incomplete Neon profiles are redirected to /admin/account/setup.
   await requireAdminSession();
   return <AdminShell>{children}</AdminShell>;
 }

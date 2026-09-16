@@ -17,9 +17,18 @@ CREATE TABLE IF NOT EXISTS site_admins (
   site_id UUID NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
   auth_user_id TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'owner',
+  display_name TEXT,
+  profile_completed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (site_id, auth_user_id)
 );
+
+-- Idempotent upgrades for existing deployments
+ALTER TABLE site_admins
+  ADD COLUMN IF NOT EXISTS display_name TEXT;
+
+ALTER TABLE site_admins
+  ADD COLUMN IF NOT EXISTS profile_completed_at TIMESTAMPTZ;
 
 CREATE INDEX IF NOT EXISTS site_admins_auth_user_id_idx
   ON site_admins (auth_user_id);

@@ -6,7 +6,12 @@ export type AdminAuditEventType =
   | "ADMIN_LOGIN_SUCCESS"
   | "ADMIN_LOGIN_FAILED"
   | "ADMIN_LOGOUT"
-  | "ADMIN_SESSION_EXPIRED";
+  | "ADMIN_SESSION_EXPIRED"
+  | "PASSWORD_RESET_REQUESTED"
+  | "PASSWORD_CHANGED"
+  | "CLIENT_INVITED"
+  | "PROFILE_COMPLETED"
+  | "EMAIL_CHANGE_REQUESTED";
 
 export type DeviceCategory = "desktop" | "mobile" | "tablet" | "unknown";
 
