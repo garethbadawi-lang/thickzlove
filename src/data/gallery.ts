@@ -15,6 +15,8 @@ export interface GalleryImage {
   displayOrder: number;
   featured: boolean;
   enabled: boolean;
+  /** SHA-256 of file bytes for uploaded images — used to avoid exact duplicates. */
+  contentHash?: string;
 }
 
 export const galleryCategories: Array<GalleryCategory | "All"> = [

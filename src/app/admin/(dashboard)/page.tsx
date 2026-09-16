@@ -19,7 +19,6 @@ const cards = [
   { href: "/admin/services", label: "Services", hint: "Names, rates, copy" },
   { href: "/admin/faq", label: "FAQ", hint: "Questions & answers" },
   { href: "/admin/settings", label: "Site Settings", hint: "Contact & footer copy" },
-  { href: "/admin/security", label: "Security Log", hint: "Login activity" },
 ] as const;
 
 export default async function AdminHomePage() {

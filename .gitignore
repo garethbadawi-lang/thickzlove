@@ -36,6 +36,9 @@ yarn-error.log*
 # private server-only data (bookings, admin audit logs)
 .data/
 
+# local admin gallery uploads (dev only — production uses Vercel Blob)
+/public/uploads/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
