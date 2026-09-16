@@ -97,10 +97,10 @@ export async function POST(req: Request) {
   }
 
   const site = await getSiteByKey(SITE_KEY);
-  let email = String(body.email || site?.bootstrapPendingEmail || "")
+  const email = String(body.email || site?.bootstrapPendingEmail || "")
     .trim()
     .toLowerCase();
-  let displayName = String(
+  const displayName = String(
     body.displayName || site?.bootstrapPendingDisplayName || "",
   ).trim();
 
