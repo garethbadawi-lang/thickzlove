@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 import { auth } from "@/lib/auth/server";
 import { getSql } from "@/lib/db";
 import { SITE_KEY, SITE_DISPLAY_NAME } from "@/lib/site";
-import { ensureSiteRecord, linkSiteAdmin } from "@/lib/site-access";
+import { ensureSiteRecord, linkSiteAdmin, completeSiteAdminProfile } from "@/lib/site-access";
 
 function appOrigin(): string {
   const fromEnv =
@@ -100,6 +100,14 @@ export async function inviteSiteClient(input: {
   });
   if (!linked) {
     throw new Error("Unable to link account to this site.");
+  }
+
+  if (input.displayName?.trim()) {
+    await completeSiteAdminProfile({
+      authUserId,
+      siteKey: SITE_KEY,
+      displayName: input.displayName.trim(),
+    });
   }
 
   // Send set-password / reset email (generic privacy-safe API).

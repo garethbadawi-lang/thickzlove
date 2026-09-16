@@ -23,12 +23,24 @@ CREATE TABLE IF NOT EXISTS site_admins (
   UNIQUE (site_id, auth_user_id)
 );
 
--- Idempotent upgrades for existing deployments
 ALTER TABLE site_admins
   ADD COLUMN IF NOT EXISTS display_name TEXT;
 
 ALTER TABLE site_admins
   ADD COLUMN IF NOT EXISTS profile_completed_at TIMESTAMPTZ;
+
+-- Client bootstrap (lovezthick) migration state on the site row
+ALTER TABLE sites
+  ADD COLUMN IF NOT EXISTS bootstrap_migrated_at TIMESTAMPTZ;
+
+ALTER TABLE sites
+  ADD COLUMN IF NOT EXISTS bootstrap_pending_email TEXT;
+
+ALTER TABLE sites
+  ADD COLUMN IF NOT EXISTS bootstrap_pending_display_name TEXT;
+
+ALTER TABLE sites
+  ADD COLUMN IF NOT EXISTS bootstrap_pending_auth_user_id TEXT;
 
 CREATE INDEX IF NOT EXISTS site_admins_auth_user_id_idx
   ON site_admins (auth_user_id);

@@ -1,23 +1,28 @@
 import { NextResponse } from "next/server";
 import {
   COOKIE_NAME,
-  createAdminSessionToken,
+  createBootstrapSessionToken,
   getAdminAccess,
   getAdminCookieOptions,
-  isLegacyAdminAuthEnabled,
-  verifyAdminCredentials,
+  isBootstrapAuthConfigured,
+  verifyBootstrapCredentials,
 } from "@/lib/admin-auth";
 import { auth, isNeonAuthConfigured } from "@/lib/auth/server";
 import {
   appendAdminAuditEvent,
   parseClientInfo,
 } from "@/lib/adminAuditLog";
+import { BOOTSTRAP_USERNAME, looksLikeEmail } from "@/lib/bootstrap";
 import { getClientIp, isRateLimited } from "@/lib/rate-limit";
 import { cookies } from "next/headers";
 import { SITE_KEY } from "@/lib/site";
 import {
   ensureSiteRecord,
+  getSiteAdminLink,
+  isBootstrapMigrated,
+  isProfileComplete,
   isUserAuthorizedForSite,
+  markBootstrapMigrated,
 } from "@/lib/site-access";
 
 function resolveRequestOrigin(req: Request): string {
@@ -51,10 +56,6 @@ type NeonSignInResult =
   | { ok: true; authUserId: string; setCookies: string[] }
   | { ok: false; reason: "credentials" | "error" };
 
-/**
- * Neon Auth rejects sign-in without Origin. Browser POSTs include it;
- * when missing (scripts), proxy through /api/auth with an explicit Origin.
- */
 async function neonSignIn(
   req: Request,
   email: string,
@@ -153,14 +154,21 @@ export async function POST(req: Request) {
     );
   }
 
-  // --- Neon Auth (preferred) ---
-  if (isNeonAuthConfigured()) {
+  // --- Permanent Neon Auth: email + password only ---
+  if (looksLikeEmail(emailOrUser) && isNeonAuthConfigured()) {
     try {
       await ensureSiteRecord(SITE_KEY, "Love Z Thick");
-      const neon = await neonSignIn(req, emailOrUser, password);
+      const neon = await neonSignIn(
+        req,
+        emailOrUser.toLowerCase(),
+        password,
+      );
 
       if (neon.ok) {
-        const allowed = await isUserAuthorizedForSite(neon.authUserId, SITE_KEY);
+        const allowed = await isUserAuthorizedForSite(
+          neon.authUserId,
+          SITE_KEY,
+        );
         if (!allowed) {
           try {
             if (neon.setCookies.length) {
@@ -194,6 +202,29 @@ export async function POST(req: Request) {
           );
         }
 
+        const migrated = await markBootstrapMigrated({
+          authUserId: neon.authUserId,
+        });
+        if (migrated?.bootstrapMigratedAt) {
+          await appendAdminAuditEvent({
+            event: "CLIENT_EMAIL_VERIFIED",
+            success: true,
+            client,
+            siteKey: SITE_KEY,
+            authUserId: neon.authUserId,
+          });
+          await appendAdminAuditEvent({
+            event: "CLIENT_ACCOUNT_MIGRATED",
+            success: true,
+            client,
+            siteKey: SITE_KEY,
+            authUserId: neon.authUserId,
+          });
+        }
+
+        const membership = await getSiteAdminLink(neon.authUserId, SITE_KEY);
+        const needsProfile = !isProfileComplete(membership);
+
         await appendAdminAuditEvent({
           event: "ADMIN_LOGIN_SUCCESS",
           success: true,
@@ -202,18 +233,48 @@ export async function POST(req: Request) {
           authUserId: neon.authUserId,
         });
 
-        const res = NextResponse.json({ ok: true, mode: "neon" });
+        const res = NextResponse.json({
+          ok: true,
+          mode: "neon",
+          requiresSetup: needsProfile,
+        });
         applySetCookies(res, neon.setCookies);
+        // Clear any leftover bootstrap cookie
+        res.cookies.set(COOKIE_NAME, "", {
+          ...getAdminCookieOptions(0),
+          maxAge: 0,
+        });
         return res;
       }
-      // Wrong Neon credentials → fall through to legacy if enabled.
+
+      await appendAdminAuditEvent({
+        event: "ADMIN_LOGIN_FAILED",
+        success: false,
+        client,
+        siteKey: SITE_KEY,
+      });
+      return NextResponse.json(
+        { error: "Invalid email or password." },
+        { status: 401 },
+      );
     } catch (err) {
       console.error("[admin-login] Neon Auth sign-in error", err);
+      await appendAdminAuditEvent({
+        event: "ADMIN_LOGIN_FAILED",
+        success: false,
+        client,
+        siteKey: SITE_KEY,
+      });
+      return NextResponse.json(
+        { error: "Invalid email or password." },
+        { status: 401 },
+      );
     }
   }
 
-  // --- Legacy ADMIN_USERNAME / ADMIN_PASSWORD_HASH (temporary) ---
-  if (!isLegacyAdminAuthEnabled()) {
+  // --- Client starter bootstrap: lovezthick only ---
+  const normalizedUser = emailOrUser.toLowerCase();
+  if (normalizedUser !== BOOTSTRAP_USERNAME) {
     await appendAdminAuditEvent({
       event: "ADMIN_LOGIN_FAILED",
       success: false,
@@ -226,7 +287,36 @@ export async function POST(req: Request) {
     );
   }
 
-  const ok = await verifyAdminCredentials(emailOrUser, password);
+  if (!isBootstrapAuthConfigured()) {
+    await appendAdminAuditEvent({
+      event: "ADMIN_LOGIN_FAILED",
+      success: false,
+      client,
+      siteKey: SITE_KEY,
+    });
+    return NextResponse.json(
+      { error: "Invalid email or password." },
+      { status: 401 },
+    );
+  }
+
+  if (await isBootstrapMigrated(SITE_KEY)) {
+    await appendAdminAuditEvent({
+      event: "ADMIN_LOGIN_FAILED",
+      success: false,
+      client,
+      siteKey: SITE_KEY,
+    });
+    return NextResponse.json(
+      {
+        error:
+          "This starter login has been replaced. Sign in with your email and password.",
+      },
+      { status: 401 },
+    );
+  }
+
+  const ok = await verifyBootstrapCredentials(normalizedUser, password);
   if (!ok) {
     await appendAdminAuditEvent({
       event: "ADMIN_LOGIN_FAILED",
@@ -242,7 +332,7 @@ export async function POST(req: Request) {
 
   let token: string;
   try {
-    token = createAdminSessionToken();
+    token = createBootstrapSessionToken();
   } catch {
     await appendAdminAuditEvent({
       event: "ADMIN_LOGIN_FAILED",
@@ -257,6 +347,13 @@ export async function POST(req: Request) {
   }
 
   await appendAdminAuditEvent({
+    event: "CLIENT_BOOTSTRAP_LOGIN",
+    success: true,
+    client,
+    sessionToken: token,
+    siteKey: SITE_KEY,
+  });
+  await appendAdminAuditEvent({
     event: "ADMIN_LOGIN_SUCCESS",
     success: true,
     client,
@@ -264,7 +361,11 @@ export async function POST(req: Request) {
     siteKey: SITE_KEY,
   });
 
-  const res = NextResponse.json({ ok: true, mode: "legacy" });
+  const res = NextResponse.json({
+    ok: true,
+    mode: "bootstrap",
+    requiresSetup: true,
+  });
   res.cookies.set(COOKIE_NAME, token, getAdminCookieOptions());
   return res;
 }

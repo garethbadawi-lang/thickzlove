@@ -6,6 +6,10 @@ export type SiteRecord = {
   siteKey: string;
   displayName: string;
   contactEmail: string | null;
+  bootstrapMigratedAt: string | null;
+  bootstrapPendingEmail: string | null;
+  bootstrapPendingDisplayName: string | null;
+  bootstrapPendingAuthUserId: string | null;
 };
 
 export type SiteAdminLink = {
@@ -18,74 +22,24 @@ export type SiteAdminLink = {
   profileCompletedAt: string | null;
 };
 
-/** Ensure the Thick Z Love site row exists (idempotent). */
-export async function ensureSiteRecord(
-  siteKey: string = SITE_KEY,
-  displayName = "Love Z Thick",
-): Promise<SiteRecord | null> {
-  if (!isDatabaseConfigured()) return null;
-  const sql = getSql();
-  await sql`
-    INSERT INTO sites (site_key, display_name)
-    VALUES (${siteKey}, ${displayName})
-    ON CONFLICT (site_key) DO NOTHING
-  `;
-  const rows = await sql`
-    SELECT id, site_key, display_name, contact_email
-    FROM sites
-    WHERE site_key = ${siteKey}
-    LIMIT 1
-  `;
-  const row = rows[0];
-  if (!row) return null;
+function mapSite(row: Record<string, unknown>): SiteRecord {
   return {
     id: String(row.id),
     siteKey: String(row.site_key),
     displayName: String(row.display_name),
     contactEmail: row.contact_email ? String(row.contact_email) : null,
-  };
-}
-
-export async function getSiteByKey(siteKey: string): Promise<SiteRecord | null> {
-  if (!isDatabaseConfigured()) return null;
-  const sql = getSql();
-  const rows = await sql`
-    SELECT id, site_key, display_name, contact_email
-    FROM sites
-    WHERE site_key = ${siteKey}
-    LIMIT 1
-  `;
-  const row = rows[0];
-  if (!row) return null;
-  return {
-    id: String(row.id),
-    siteKey: String(row.site_key),
-    displayName: String(row.display_name),
-    contactEmail: row.contact_email ? String(row.contact_email) : null,
-  };
-}
-
-export async function updateSiteContactEmail(
-  siteKey: string,
-  contactEmail: string | null,
-): Promise<SiteRecord | null> {
-  if (!isDatabaseConfigured()) return null;
-  const sql = getSql();
-  const normalized =
-    contactEmail && contactEmail.trim() ? contactEmail.trim().toLowerCase() : null;
-  const rows = await sql`
-    UPDATE sites
-    SET contact_email = ${normalized}, updated_at = now()
-    WHERE site_key = ${siteKey}
-    RETURNING id, site_key, display_name, contact_email
-  `;
-  const row = rows[0];
-  if (!row) return null;
-  return {
-    id: String(row.id),
-    siteKey: String(row.site_key),
-    displayName: String(row.display_name),
-    contactEmail: row.contact_email ? String(row.contact_email) : null,
+    bootstrapMigratedAt: row.bootstrap_migrated_at
+      ? String(row.bootstrap_migrated_at)
+      : null,
+    bootstrapPendingEmail: row.bootstrap_pending_email
+      ? String(row.bootstrap_pending_email)
+      : null,
+    bootstrapPendingDisplayName: row.bootstrap_pending_display_name
+      ? String(row.bootstrap_pending_display_name)
+      : null,
+    bootstrapPendingAuthUserId: row.bootstrap_pending_auth_user_id
+      ? String(row.bootstrap_pending_auth_user_id)
+      : null,
   };
 }
 
@@ -103,10 +57,124 @@ function mapSiteAdmin(row: Record<string, unknown>): SiteAdminLink {
   };
 }
 
-/**
- * Server-side site authorization: Neon Auth user must be linked in site_admins
- * for the given site_key. Never trust a client-supplied site_key alone.
- */
+const SITE_SELECT = `
+  id, site_key, display_name, contact_email,
+  bootstrap_migrated_at, bootstrap_pending_email,
+  bootstrap_pending_display_name, bootstrap_pending_auth_user_id
+`;
+
+/** Ensure the Thick Z Love site row exists (idempotent). */
+export async function ensureSiteRecord(
+  siteKey: string = SITE_KEY,
+  displayName = "Love Z Thick",
+): Promise<SiteRecord | null> {
+  if (!isDatabaseConfigured()) return null;
+  const sql = getSql();
+  await sql`
+    INSERT INTO sites (site_key, display_name)
+    VALUES (${siteKey}, ${displayName})
+    ON CONFLICT (site_key) DO NOTHING
+  `;
+  return getSiteByKey(siteKey);
+}
+
+export async function getSiteByKey(siteKey: string): Promise<SiteRecord | null> {
+  if (!isDatabaseConfigured()) return null;
+  const sql = getSql();
+  const rows = await sql`
+    SELECT
+      id, site_key, display_name, contact_email,
+      bootstrap_migrated_at, bootstrap_pending_email,
+      bootstrap_pending_display_name, bootstrap_pending_auth_user_id
+    FROM sites
+    WHERE site_key = ${siteKey}
+    LIMIT 1
+  `;
+  const row = rows[0];
+  if (!row) return null;
+  return mapSite(row as Record<string, unknown>);
+}
+
+export async function isBootstrapMigrated(siteKey = SITE_KEY): Promise<boolean> {
+  const site = await getSiteByKey(siteKey);
+  return Boolean(site?.bootstrapMigratedAt);
+}
+
+export async function setBootstrapPending(input: {
+  siteKey?: string;
+  email: string;
+  displayName: string;
+  authUserId: string;
+}): Promise<SiteRecord | null> {
+  if (!isDatabaseConfigured()) return null;
+  const siteKey = input.siteKey || SITE_KEY;
+  const sql = getSql();
+  const rows = await sql`
+    UPDATE sites
+    SET
+      bootstrap_pending_email = ${input.email.trim().toLowerCase()},
+      bootstrap_pending_display_name = ${input.displayName.trim()},
+      bootstrap_pending_auth_user_id = ${input.authUserId},
+      updated_at = now()
+    WHERE site_key = ${siteKey}
+      AND bootstrap_migrated_at IS NULL
+    RETURNING
+      id, site_key, display_name, contact_email,
+      bootstrap_migrated_at, bootstrap_pending_email,
+      bootstrap_pending_display_name, bootstrap_pending_auth_user_id
+  `;
+  const row = rows[0];
+  if (!row) return null;
+  return mapSite(row as Record<string, unknown>);
+}
+
+export async function markBootstrapMigrated(input: {
+  siteKey?: string;
+  authUserId: string;
+}): Promise<SiteRecord | null> {
+  if (!isDatabaseConfigured()) return null;
+  const siteKey = input.siteKey || SITE_KEY;
+  const sql = getSql();
+  const rows = await sql`
+    UPDATE sites
+    SET
+      bootstrap_migrated_at = COALESCE(bootstrap_migrated_at, now()),
+      updated_at = now()
+    WHERE site_key = ${siteKey}
+      AND bootstrap_migrated_at IS NULL
+      AND bootstrap_pending_auth_user_id = ${input.authUserId}
+    RETURNING
+      id, site_key, display_name, contact_email,
+      bootstrap_migrated_at, bootstrap_pending_email,
+      bootstrap_pending_display_name, bootstrap_pending_auth_user_id
+  `;
+  const row = rows[0];
+  if (!row) return null;
+  return mapSite(row as Record<string, unknown>);
+}
+
+export async function updateSiteContactEmail(
+  siteKey: string,
+  contactEmail: string | null,
+): Promise<SiteRecord | null> {
+  if (!isDatabaseConfigured()) return null;
+  const sql = getSql();
+  const normalized =
+    contactEmail && contactEmail.trim() ? contactEmail.trim().toLowerCase() : null;
+  const rows = await sql`
+    UPDATE sites
+    SET contact_email = ${normalized}, updated_at = now()
+    WHERE site_key = ${siteKey}
+    RETURNING
+      id, site_key, display_name, contact_email,
+      bootstrap_migrated_at, bootstrap_pending_email,
+      bootstrap_pending_display_name, bootstrap_pending_auth_user_id
+  `;
+  const row = rows[0];
+  if (!row) return null;
+  return mapSite(row as Record<string, unknown>);
+}
+
 export async function getSiteAdminLink(
   authUserId: string,
   siteKey: string,
@@ -158,7 +226,8 @@ export async function linkSiteAdmin(input: {
     INSERT INTO site_admins (site_id, auth_user_id, role, display_name)
     VALUES (${site.id}, ${input.authUserId}, ${role}, ${displayName})
     ON CONFLICT (site_id, auth_user_id) DO UPDATE
-      SET role = EXCLUDED.role
+      SET role = EXCLUDED.role,
+          display_name = COALESCE(EXCLUDED.display_name, site_admins.display_name)
   `;
 
   return getSiteAdminLink(input.authUserId, input.siteKey);
@@ -231,3 +300,6 @@ export async function updateSiteAdminDisplayName(input: {
 export function isProfileComplete(link: SiteAdminLink | null | undefined): boolean {
   return Boolean(link?.profileCompletedAt);
 }
+
+// silence unused in case SITE_SELECT kept for docs
+void SITE_SELECT;

@@ -23,6 +23,16 @@ function eventLabel(entry: AdminAuditEntry): string {
       return "Password changed";
     case "CLIENT_INVITED":
       return entry.success ? "Client invited" : "Client invite failed";
+    case "CLIENT_BOOTSTRAP_LOGIN":
+      return "Client starter login";
+    case "CLIENT_EMAIL_SUBMITTED":
+      return entry.success
+        ? "Client email submitted for setup"
+        : "Client email setup failed";
+    case "CLIENT_EMAIL_VERIFIED":
+      return "Client email verified";
+    case "CLIENT_ACCOUNT_MIGRATED":
+      return "Client account migrated";
     case "PROFILE_COMPLETED":
       return "Profile completed";
     case "EMAIL_CHANGE_REQUESTED":

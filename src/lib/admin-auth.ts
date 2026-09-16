@@ -3,9 +3,12 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { isNeonAuthConfigured, auth } from "@/lib/auth/server";
+import { BOOTSTRAP_USERNAME } from "@/lib/bootstrap";
 import {
   getSiteAdminLink,
+  isBootstrapMigrated,
   isProfileComplete,
+  markBootstrapMigrated,
   type SiteAdminLink,
 } from "@/lib/site-access";
 import { SITE_KEY } from "@/lib/site";
@@ -13,7 +16,6 @@ import { SITE_KEY } from "@/lib/site";
 export const COOKIE_NAME = "lzt_admin_session";
 export const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 7; // 7 days
 
-/** Valid bcrypt hash used only so compare still takes time when env is misconfigured. */
 const DUMMY_PASSWORD_HASH =
   "$2b$12$0ZFynKACBARo.Cq6Xrf/NOx542kQMWJ5QniODmx7b2YGsW4FNJjUy";
 
@@ -28,22 +30,18 @@ export type AdminAccess =
       profileComplete: boolean;
     }
   | {
-      mode: "legacy";
+      mode: "bootstrap";
       siteKey: string;
       authUserId?: undefined;
       email?: undefined;
       name?: undefined;
       membership?: undefined;
-      profileComplete: true;
+      /** Bootstrap must finish email migration before dashboard. */
+      profileComplete: false;
     };
 
 function getSessionSecret(): string | null {
   const value = process.env.ADMIN_SESSION_SECRET?.trim();
-  return value || null;
-}
-
-function getAdminUsername(): string | null {
-  const value = process.env.ADMIN_USERNAME?.trim();
   return value || null;
 }
 
@@ -68,23 +66,25 @@ function sign(payload: string, secret: string): string {
 }
 
 /**
- * Verify username + password against server-only env (legacy fallback).
- * Never logs credentials. Returns a single boolean (generic failure).
+ * Verify lovezthick bootstrap username + password against ADMIN_PASSWORD_HASH.
+ * Only the bootstrap username is accepted — not arbitrary legacy usernames.
  */
-export async function verifyAdminCredentials(
+export async function verifyBootstrapCredentials(
   username: string,
   password: string,
 ): Promise<boolean> {
-  const expectedUser = getAdminUsername();
   const passwordHash = getPasswordHash();
   const secret = getSessionSecret();
 
-  if (!expectedUser || !passwordHash || !secret) {
+  if (!passwordHash || !secret) {
     await bcrypt.compare(password || "x", DUMMY_PASSWORD_HASH).catch(() => false);
     return false;
   }
 
-  const userOk = timingSafeEqualString(username.trim(), expectedUser);
+  const userOk = timingSafeEqualString(
+    username.trim().toLowerCase(),
+    BOOTSTRAP_USERNAME,
+  );
   let passOk = false;
   try {
     passOk = await bcrypt.compare(password, passwordHash);
@@ -95,17 +95,25 @@ export async function verifyAdminCredentials(
   return userOk && passOk;
 }
 
-export function createAdminSessionToken(): string {
+/** @deprecated Use verifyBootstrapCredentials — kept for any leftover imports. */
+export async function verifyAdminCredentials(
+  username: string,
+  password: string,
+): Promise<boolean> {
+  return verifyBootstrapCredentials(username, password);
+}
+
+export function createBootstrapSessionToken(): string {
   const secret = getSessionSecret();
   if (!secret) {
     throw new Error("ADMIN_SESSION_SECRET is not configured");
   }
   const expiresAt = Date.now() + SESSION_MAX_AGE_SEC * 1000;
-  const payload = `admin:${expiresAt}`;
+  const payload = `bootstrap:${expiresAt}`;
   return `${payload}.${sign(payload, secret)}`;
 }
 
-export function isValidAdminToken(token: string | undefined): boolean {
+export function isValidBootstrapToken(token: string | undefined): boolean {
   if (!token) return false;
   const secret = getSessionSecret();
   if (!secret) return false;
@@ -124,7 +132,7 @@ export function isValidAdminToken(token: string | undefined): boolean {
   }
 
   const parts = payload.split(":");
-  if (parts.length !== 2 || parts[0] !== "admin") return false;
+  if (parts.length !== 2 || parts[0] !== "bootstrap") return false;
   const expiresAt = Number(parts[1]);
   if (!Number.isFinite(expiresAt) || Date.now() > expiresAt) return false;
 
@@ -165,7 +173,9 @@ export async function isValidAdminTokenEdge(
     if (mismatch !== 0) return false;
 
     const parts = payload.split(":");
-    if (parts.length !== 2 || parts[0] !== "admin") return false;
+    if (parts.length !== 2 || (parts[0] !== "bootstrap" && parts[0] !== "admin")) {
+      return false;
+    }
     const expiresAt = Number(parts[1]);
     if (!Number.isFinite(expiresAt) || Date.now() > expiresAt) return false;
     return true;
@@ -174,11 +184,6 @@ export async function isValidAdminTokenEdge(
   }
 }
 
-/**
- * Resolve admin access for THIS site only.
- * Neon Auth session alone is not enough — user must be in site_admins for thickzlove.
- * Legacy HMAC cookie remains a temporary fallback.
- */
 export async function getAdminAccess(): Promise<AdminAccess | null> {
   if (isNeonAuthConfigured()) {
     try {
@@ -187,6 +192,13 @@ export async function getAdminAccess(): Promise<AdminAccess | null> {
       if (userId) {
         const membership = await getSiteAdminLink(userId, SITE_KEY);
         if (membership) {
+          // If this Neon user is the pending bootstrap migration target, seal migration.
+          try {
+            await markBootstrapMigrated({ authUserId: userId });
+          } catch {
+            /* ignore */
+          }
+
           return {
             mode: "neon",
             authUserId: userId,
@@ -197,7 +209,6 @@ export async function getAdminAccess(): Promise<AdminAccess | null> {
             profileComplete: isProfileComplete(membership),
           };
         }
-        // Authenticated elsewhere but not linked to this site → deny Neon path.
       }
     } catch (err) {
       console.error("[admin-auth] Neon session check failed", err);
@@ -205,8 +216,16 @@ export async function getAdminAccess(): Promise<AdminAccess | null> {
   }
 
   const jar = await cookies();
-  if (isValidAdminToken(jar.get(COOKIE_NAME)?.value)) {
-    return { mode: "legacy", siteKey: SITE_KEY, profileComplete: true };
+  const token = jar.get(COOKIE_NAME)?.value;
+  if (isValidBootstrapToken(token)) {
+    if (await isBootstrapMigrated(SITE_KEY)) {
+      return null;
+    }
+    return {
+      mode: "bootstrap",
+      siteKey: SITE_KEY,
+      profileComplete: false,
+    };
   }
 
   return null;
@@ -216,7 +235,6 @@ export async function isAdminAuthenticated(): Promise<boolean> {
   return (await getAdminAccess()) !== null;
 }
 
-/** Server Components / layouts: redirect to login when unauthenticated. */
 export async function requireAdminSession(options?: {
   allowIncompleteProfile?: boolean;
 }): Promise<AdminAccess> {
@@ -225,11 +243,11 @@ export async function requireAdminSession(options?: {
     redirect("/admin/login");
   }
 
-  if (
-    access.mode === "neon" &&
-    !access.profileComplete &&
-    !options?.allowIncompleteProfile
-  ) {
+  const needsSetup =
+    access.mode === "bootstrap" ||
+    (access.mode === "neon" && !access.profileComplete);
+
+  if (needsSetup && !options?.allowIncompleteProfile) {
     redirect("/admin/account/setup");
   }
 
@@ -246,7 +264,6 @@ export function getAdminCookieOptions(maxAge = SESSION_MAX_AGE_SEC) {
   };
 }
 
-/** Temporary: true while ADMIN_* env credentials remain configured. */
-export function isLegacyAdminAuthEnabled(): boolean {
-  return Boolean(getAdminUsername() && getPasswordHash() && getSessionSecret());
+export function isBootstrapAuthConfigured(): boolean {
+  return Boolean(getPasswordHash() && getSessionSecret());
 }

@@ -21,12 +21,12 @@ export default async function AdminAccountPage() {
         </p>
       </div>
       <AdminAccountPanel
-        mode={access.mode}
+        mode={access.mode === "neon" ? "neon" : "bootstrap"}
         email={access.email || null}
         displayName={
           access.mode === "neon"
             ? access.membership?.displayName || access.name || ""
-            : "Developer (legacy)"
+            : "Client (setup)"
         }
       />
     </div>

@@ -7,7 +7,7 @@ import { siteConfig } from "@/data/site-config";
 
 export function AdminLoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -21,20 +21,30 @@ export function AdminLoginForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: identifier, password }),
       });
+
+      const data = (await res.json().catch(() => null)) as {
+        error?: string;
+        mode?: string;
+        requiresSetup?: boolean;
+      } | null;
 
       if (!res.ok) {
         if (res.status === 429) {
           setError("Too many attempts. Please try again later.");
         } else {
-          setError("Invalid email or password.");
+          setError(data?.error || "Invalid email or password.");
         }
         return;
       }
 
       setPassword("");
-      router.replace("/admin");
+      if (data?.requiresSetup || data?.mode === "bootstrap") {
+        router.replace("/admin/account/setup");
+      } else {
+        router.replace("/admin");
+      }
       router.refresh();
     } catch {
       setError("Invalid email or password.");
@@ -52,17 +62,23 @@ export function AdminLoginForm() {
       <div className="text-center">
         <p className="font-script text-3xl text-burgundy">{siteConfig.name}</p>
         <h1 className="mt-3 font-display text-2xl text-espresso">Admin Login</h1>
+        <p className="mt-2 text-sm text-warmgrey">
+          Use your email and password, or the temporary starter username if you
+          haven&apos;t finished account setup yet.
+        </p>
       </div>
 
       <label className="block text-sm">
-        <span className="mb-1.5 block font-medium text-espresso">Email</span>
+        <span className="mb-1.5 block font-medium text-espresso">
+          Email or username
+        </span>
         <input
           type="text"
           name="email"
           inputMode="email"
           className="input-light"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
           autoComplete="username"
           required
         />

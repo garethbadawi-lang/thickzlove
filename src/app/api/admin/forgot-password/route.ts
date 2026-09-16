@@ -47,7 +47,8 @@ export async function POST(req: Request) {
       "If an account exists for that email, we've sent password reset instructions.",
   };
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  // Email-only: never accept starter usernames (e.g. lovezthick) for reset.
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !email.includes("@")) {
     await appendAdminAuditEvent({
       event: "PASSWORD_RESET_REQUESTED",
       success: false,

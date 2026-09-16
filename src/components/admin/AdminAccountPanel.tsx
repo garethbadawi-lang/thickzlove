@@ -8,7 +8,7 @@ export function AdminAccountPanel({
   email,
   displayName: initialName,
 }: {
-  mode: "neon" | "legacy";
+  mode: "neon" | "bootstrap";
   email: string | null;
   displayName: string;
 }) {
@@ -95,13 +95,12 @@ export function AdminAccountPanel({
     router.refresh();
   }
 
-  if (mode === "legacy") {
+  if (mode === "bootstrap") {
     return (
       <div className="card-light space-y-4 p-5">
         <p className="text-sm text-warmgrey">
-          You are signed in with the temporary developer legacy login. Neon
-          account settings apply after you invite the client email/password
-          account.
+          You are on the temporary starter login. Finish account setup to switch
+          to your permanent email and password.
         </p>
         <button type="button" className="btn-secondary" onClick={() => void logout()}>
           Log out

@@ -17,12 +17,12 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (access.mode === "legacy") {
+  if (access.mode === "bootstrap") {
     return NextResponse.json({
-      mode: "legacy",
-      profileComplete: true,
+      mode: "bootstrap",
+      profileComplete: false,
       email: null,
-      displayName: "Developer (legacy)",
+      displayName: null,
     });
   }
 
