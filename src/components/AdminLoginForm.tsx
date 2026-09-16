@@ -6,7 +6,7 @@ import { siteConfig } from "@/data/site-config";
 
 export function AdminLoginForm() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -19,14 +19,15 @@ export function AdminLoginForm() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
       });
 
       if (!res.ok) {
         if (res.status === 429) {
           setError("Too many attempts. Please try again later.");
         } else {
-          setError("Invalid username or password.");
+          setError("Invalid email or password.");
         }
         return;
       }
@@ -35,7 +36,7 @@ export function AdminLoginForm() {
       router.replace("/admin");
       router.refresh();
     } catch {
-      setError("Invalid username or password.");
+      setError("Invalid email or password.");
     } finally {
       setBusy(false);
     }
@@ -53,13 +54,14 @@ export function AdminLoginForm() {
       </div>
 
       <label className="block text-sm">
-        <span className="mb-1.5 block font-medium text-espresso">Username</span>
+        <span className="mb-1.5 block font-medium text-espresso">Email</span>
         <input
           type="text"
-          name="username"
+          name="email"
+          inputMode="email"
           className="input-light"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           autoComplete="username"
           required
         />

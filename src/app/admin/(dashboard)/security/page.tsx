@@ -112,6 +112,24 @@ export default async function AdminSecurityPage() {
                   </dt>
                   <dd className="text-espresso">{locationLabel(entry)}</dd>
                 </div>
+                {entry.siteKey && (
+                  <div>
+                    <dt className="text-xs uppercase tracking-[0.12em] text-muted">
+                      Site
+                    </dt>
+                    <dd className="text-espresso">{entry.siteKey}</dd>
+                  </div>
+                )}
+                {entry.authUserId && (
+                  <div>
+                    <dt className="text-xs uppercase tracking-[0.12em] text-muted">
+                      Auth user
+                    </dt>
+                    <dd className="break-all font-mono text-xs text-espresso">
+                      {entry.authUserId}
+                    </dd>
+                  </div>
+                )}
               </dl>
             </li>
           ))}

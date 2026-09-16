@@ -31,7 +31,7 @@ export function middleware(req: NextRequest) {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self'",
+      "connect-src 'self' https://*.neonauth.c-2.eu-west-2.aws.neon.tech https://*.neon.tech",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

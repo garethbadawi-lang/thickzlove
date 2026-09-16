@@ -2,6 +2,9 @@ import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "crypto";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
+import { isNeonAuthConfigured, auth } from "@/lib/auth/server";
+import { isUserAuthorizedForSite } from "@/lib/site-access";
+import { SITE_KEY } from "@/lib/site";
 
 export const COOKIE_NAME = "lzt_admin_session";
 export const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 7; // 7 days
@@ -9,6 +12,20 @@ export const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 7; // 7 days
 /** Valid bcrypt hash used only so compare still takes time when env is misconfigured. */
 const DUMMY_PASSWORD_HASH =
   "$2b$12$0ZFynKACBARo.Cq6Xrf/NOx542kQMWJ5QniODmx7b2YGsW4FNJjUy";
+
+export type AdminAccess =
+  | {
+      mode: "neon";
+      authUserId: string;
+      siteKey: string;
+      email?: string | null;
+    }
+  | {
+      mode: "legacy";
+      siteKey: string;
+      authUserId?: undefined;
+      email?: undefined;
+    };
 
 function getSessionSecret(): string | null {
   const value = process.env.ADMIN_SESSION_SECRET?.trim();
@@ -29,7 +46,6 @@ function timingSafeEqualString(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
   const bufB = Buffer.from(b);
   if (bufA.length !== bufB.length) {
-    // Still compare equal-length buffers to reduce length oracle noise.
     const padded = Buffer.alloc(bufA.length);
     timingSafeEqual(bufA, padded);
     return false;
@@ -42,7 +58,7 @@ function sign(payload: string, secret: string): string {
 }
 
 /**
- * Verify username + password against server-only env.
+ * Verify username + password against server-only env (legacy fallback).
  * Never logs credentials. Returns a single boolean (generic failure).
  */
 export async function verifyAdminCredentials(
@@ -54,7 +70,6 @@ export async function verifyAdminCredentials(
   const secret = getSessionSecret();
 
   if (!expectedUser || !passwordHash || !secret) {
-    // Misconfigured server: fail closed, but still run a compare for timing.
     await bcrypt.compare(password || "x", DUMMY_PASSWORD_HASH).catch(() => false);
     return false;
   }
@@ -149,9 +164,43 @@ export async function isValidAdminTokenEdge(
   }
 }
 
-export async function isAdminAuthenticated(): Promise<boolean> {
+/**
+ * Resolve admin access for THIS site only.
+ * Neon Auth session alone is not enough — user must be in site_admins for thickzlove.
+ * Legacy HMAC cookie remains a temporary fallback.
+ */
+export async function getAdminAccess(): Promise<AdminAccess | null> {
+  if (isNeonAuthConfigured()) {
+    try {
+      const { data: session } = await auth.getSession();
+      const userId = session?.user?.id ? String(session.user.id) : null;
+      if (userId) {
+        const allowed = await isUserAuthorizedForSite(userId, SITE_KEY);
+        if (allowed) {
+          return {
+            mode: "neon",
+            authUserId: userId,
+            siteKey: SITE_KEY,
+            email: session?.user?.email ? String(session.user.email) : null,
+          };
+        }
+        // Authenticated elsewhere but not linked to this site → deny Neon path.
+      }
+    } catch (err) {
+      console.error("[admin-auth] Neon session check failed", err);
+    }
+  }
+
   const jar = await cookies();
-  return isValidAdminToken(jar.get(COOKIE_NAME)?.value);
+  if (isValidAdminToken(jar.get(COOKIE_NAME)?.value)) {
+    return { mode: "legacy", siteKey: SITE_KEY };
+  }
+
+  return null;
+}
+
+export async function isAdminAuthenticated(): Promise<boolean> {
+  return (await getAdminAccess()) !== null;
 }
 
 /** Server Components / layouts: redirect to login when unauthenticated. */
@@ -169,4 +218,9 @@ export function getAdminCookieOptions(maxAge = SESSION_MAX_AGE_SEC) {
     path: "/",
     maxAge,
   };
+}
+
+/** Temporary: true while ADMIN_* env credentials remain configured. */
+export function isLegacyAdminAuthEnabled(): boolean {
+  return Boolean(getAdminUsername() && getPasswordHash() && getSessionSecret());
 }

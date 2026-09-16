@@ -13,6 +13,7 @@ type SettingsContent = SiteContent["settings"];
 export function AdminSettingsEditor() {
   const router = useRouter();
   const [settings, setSettings] = useState<SettingsContent | null>(null);
+  const [contactEmail, setContactEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,6 +27,14 @@ export function AdminSettingsEditor() {
         if (!res.ok) throw new Error("Unable to load settings.");
         const data = (await res.json()) as { content: SiteContent };
         setSettings(data.content.settings);
+
+        const siteRes = await fetch("/api/admin/site");
+        if (siteRes.ok) {
+          const site = (await siteRes.json()) as {
+            contactEmail?: string | null;
+          };
+          setContactEmail(site.contactEmail || "");
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unable to load.");
       }
@@ -46,6 +55,26 @@ export function AdminSettingsEditor() {
           Safe public business wording only. Passwords, storage tokens and
           developer credit are not editable here.
         </p>
+      </div>
+
+      <div className="card-light space-y-4 p-5">
+        <label className="block text-sm">
+          <span className="mb-1 block font-medium">
+            Business contact email (Neon)
+          </span>
+          <input
+            className="input-light"
+            type="email"
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
+            placeholder="Add when you have her public email"
+            autoComplete="off"
+          />
+          <span className="mt-1 block text-xs text-warmgrey">
+            Stored on the Thick Z Love site record — separate from developer
+            email and login accounts.
+          </span>
+        </label>
       </div>
 
       <div className="card-light space-y-4 p-5">
@@ -110,6 +139,19 @@ export function AdminSettingsEditor() {
       <AdminSaveBar
         onSave={async () => {
           await saveContentSection("settings", settings);
+          const siteRes = await fetch("/api/admin/site", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contactEmail: contactEmail.trim() || null,
+            }),
+          });
+          if (!siteRes.ok) {
+            const data = (await siteRes.json().catch(() => null)) as {
+              error?: string;
+            } | null;
+            throw new Error(data?.error || "Unable to save business email.");
+          }
         }}
       />
     </div>

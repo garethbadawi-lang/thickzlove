@@ -27,6 +27,10 @@ export type AdminAuditEntry = {
   sessionHash: string | null;
   /** True when IP or device fingerprint differs from prior successful login. */
   newIpOrDevice: boolean;
+  /** Neon Auth user id when known — never tokens or passwords. */
+  authUserId: string | null;
+  /** Site key this event relates to (e.g. thickzlove). */
+  siteKey: string | null;
 };
 
 export type ParsedClientInfo = {
@@ -160,6 +164,8 @@ export async function appendAdminAuditEvent(input: {
   success: boolean;
   client: ParsedClientInfo;
   sessionToken?: string | null;
+  authUserId?: string | null;
+  siteKey?: string | null;
 }): Promise<AdminAuditEntry | null> {
   try {
     const entries = await readRaw();
@@ -186,6 +192,8 @@ export async function appendAdminAuditEvent(input: {
       region: input.client.region,
       sessionHash,
       newIpOrDevice,
+      authUserId: input.authUserId ? String(input.authUserId).slice(0, 128) : null,
+      siteKey: input.siteKey ? String(input.siteKey).slice(0, 64) : null,
     };
 
     const next = [entry, ...entries].slice(0, MAX_ENTRIES);
