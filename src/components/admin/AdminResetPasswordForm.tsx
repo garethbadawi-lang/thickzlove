@@ -5,31 +5,33 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { siteConfig } from "@/data/site-config";
 
-export function AdminResetPasswordForm({
-  token,
-  error,
-}: {
-  token: string;
-  error: string | null;
-}) {
+/**
+ * Password change is bound to the Neon Auth reset token from the email link.
+ * Never accepts email / userId from the browser to select an account.
+ */
+export function AdminResetPasswordForm({ token }: { token: string }) {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [message, setMessage] = useState<string | null>(
-    error ? "This reset link is invalid or expired. Request a new one." : null,
-  );
+  const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!token) {
-      setMessage("Missing reset token. Use the link from your email.");
+    if (!token.trim()) {
+      setMessage("Invalid or expired password reset link.");
       return;
     }
     if (password !== confirm) {
       setMessage("Passwords do not match.");
       return;
     }
+    if (password.length < 8) {
+      setMessage("Password must be at least 8 characters.");
+      return;
+    }
+
     setBusy(true);
     setMessage(null);
     try {
@@ -42,32 +44,38 @@ export function AdminResetPasswordForm({
           token,
         }),
       });
+
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as {
           message?: string;
           error?: string;
         } | null;
+        // Never surface raw tokens; keep messaging generic for auth failures.
         setMessage(
           data?.message ||
             data?.error ||
-            "Unable to reset password. Request a new link.",
+            "Invalid or expired password reset link. Request a new reset link to continue.",
         );
         return;
       }
 
-      // Audit via dedicated endpoint without exposing token
       await fetch("/api/admin/password-changed", {
         method: "POST",
         credentials: "include",
       }).catch(() => null);
 
+      setDone(true);
+      setPassword("");
+      setConfirm("");
       setMessage("Password updated. You can sign in now.");
       setTimeout(() => {
         router.replace("/admin/login");
         router.refresh();
-      }, 800);
+      }, 900);
     } catch {
-      setMessage("Unable to reset password. Request a new link.");
+      setMessage(
+        "Unable to reset password. Request a new reset link to continue.",
+      );
     } finally {
       setBusy(false);
     }
@@ -77,12 +85,16 @@ export function AdminResetPasswordForm({
     <form
       onSubmit={onSubmit}
       className="mx-auto w-full max-w-md card-light space-y-5 p-8"
+      autoComplete="off"
     >
       <div className="text-center">
         <p className="font-script text-3xl text-burgundy">{siteConfig.name}</p>
         <h1 className="mt-3 font-display text-2xl text-espresso">
           Choose a new password
         </h1>
+        <p className="mt-2 text-sm text-warmgrey">
+          Your account is confirmed by the secure link from your email.
+        </p>
       </div>
 
       <label className="block text-sm">
@@ -97,6 +109,7 @@ export function AdminResetPasswordForm({
           required
           minLength={8}
           autoComplete="new-password"
+          disabled={busy || done}
         />
       </label>
 
@@ -112,6 +125,7 @@ export function AdminResetPasswordForm({
           required
           minLength={8}
           autoComplete="new-password"
+          disabled={busy || done}
         />
       </label>
 
@@ -120,9 +134,9 @@ export function AdminResetPasswordForm({
       <button
         type="submit"
         className="btn-primary w-full"
-        disabled={busy || !token}
+        disabled={busy || done || !token.trim()}
       >
-        {busy ? "Saving…" : "Save password"}
+        {busy ? "Saving…" : done ? "Saved" : "Save password"}
       </button>
 
       <p className="text-center text-sm">
