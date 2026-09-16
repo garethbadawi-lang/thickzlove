@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createBooking } from "@/lib/booking-store";
 import type { BookingFormPayload } from "@/lib/booking-types";
+import { notifyBookingEnquiry } from "@/lib/notifications";
 import { getClientIp, isRateLimited } from "@/lib/rate-limit";
 import { validateBookingPayload } from "@/lib/validate-booking";
 import { getServiceById } from "@/data/services";
@@ -57,6 +58,10 @@ export async function POST(req: Request) {
       howFound: String(body.howFound || "").trim(),
       timeWindow: String(body.timeWindow || "").trim(),
     });
+
+    // Email notification is prepared only when BOOKING_NOTIFICATION_EMAIL is set.
+    // No recipient / no mail provider = silent skip; local storage still succeeds.
+    await notifyBookingEnquiry(booking);
 
     if (process.env.BOOKING_WEBHOOK_URL) {
       await fetch(process.env.BOOKING_WEBHOOK_URL, {

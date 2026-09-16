@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { notifyContactEnquiry } from "@/lib/notifications";
 
 type ContactBody = {
   name?: string;
@@ -89,8 +90,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Input too long." }, { status: 400 });
     }
 
-    // In production, forward to an email service / webhook.
-    // No secrets required for this template — messages are acknowledged only.
+    const receivedAt = new Date().toISOString();
+
+    // Email notification is prepared only when CONTACT_NOTIFICATION_EMAIL is set.
+    // No recipient / no mail provider = silent skip.
+    await notifyContactEnquiry({
+      name,
+      email,
+      platform,
+      enquiryType,
+      experience,
+      message,
+      receivedAt,
+    });
+
     if (process.env.CONTACT_WEBHOOK_URL) {
       await fetch(process.env.CONTACT_WEBHOOK_URL, {
         method: "POST",
@@ -102,7 +115,7 @@ export async function POST(req: Request) {
           enquiryType,
           experience,
           message,
-          receivedAt: new Date().toISOString(),
+          receivedAt,
         }),
       });
     } else if (process.env.NODE_ENV === "development") {
