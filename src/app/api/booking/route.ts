@@ -4,7 +4,7 @@ import type { BookingFormPayload } from "@/lib/booking-types";
 import { notifyBookingEnquiry } from "@/lib/notifications";
 import { getClientIp, isRateLimited } from "@/lib/rate-limit";
 import { validateBookingPayload } from "@/lib/validate-booking";
-import { getServiceById } from "@/data/services";
+import { getPublicServiceById } from "@/lib/public-content";
 
 export async function POST(req: Request) {
   try {
@@ -22,12 +22,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, referenceNumber: "RECEIVED" });
     }
 
-    const errors = validateBookingPayload(body);
+    const errors = await validateBookingPayload(body);
     if (errors.length) {
       return NextResponse.json({ error: errors[0] }, { status: 400 });
     }
 
-    const service = getServiceById(String(body.serviceId));
+    const service = await getPublicServiceById(String(body.serviceId));
     if (!service) {
       return NextResponse.json({ error: "Invalid service." }, { status: 400 });
     }

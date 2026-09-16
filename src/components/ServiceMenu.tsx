@@ -1,8 +1,8 @@
-import { getEnabledServices } from "@/data/services";
+import { getPublicServices } from "@/lib/public-content";
 import { ServiceMenuItem } from "./ServiceMenuItem";
 
-export function ServiceMenu() {
-  const items = getEnabledServices();
+export async function ServiceMenu() {
+  const items = await getPublicServices();
 
   return (
     <div className="divide-y-0">

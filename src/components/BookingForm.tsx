@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getServiceById } from "@/data/services";
+import type { CompanionService } from "@/data/services";
 import {
   contactMethods,
   venueTypes,
@@ -45,7 +45,13 @@ const initial: BookingFormPayload = {
   website: "",
 };
 
-export function BookingForm() {
+export function BookingForm({
+  services,
+  responseTime,
+}: {
+  services: CompanionService[];
+  responseTime: string;
+}) {
   const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<BookingFormPayload>(initial);
@@ -58,19 +64,24 @@ export function BookingForm() {
     const service = searchParams.get("service") || "";
     const date = searchParams.get("date") || "";
     const window = searchParams.get("window") || "";
+    const matched = service
+      ? services.find((s) => s.id === service)
+      : undefined;
     setForm((prev) => ({
       ...prev,
       serviceId: service || prev.serviceId,
       preferredDate: date || prev.preferredDate,
       timeWindow: window || prev.timeWindow,
-      requestedDuration:
-        (service && getServiceById(service)?.duration) || prev.requestedDuration,
+      requestedDuration: matched?.duration || prev.requestedDuration,
     }));
-  }, [searchParams]);
+  }, [searchParams, services]);
 
   const selectedService = useMemo(
-    () => (form.serviceId ? getServiceById(form.serviceId) : undefined),
-    [form.serviceId],
+    () =>
+      form.serviceId
+        ? services.find((s) => s.id === form.serviceId)
+        : undefined,
+    [form.serviceId, services],
   );
 
   function update<K extends keyof BookingFormPayload>(
@@ -152,7 +163,7 @@ export function BookingForm() {
           <span className="font-semibold text-espresso">{reference}</span>. This
           does not confirm a booking.
         </p>
-        <p className="text-sm text-warmgrey">{siteConfig.contact.responseTime}</p>
+        <p className="text-sm text-warmgrey">{responseTime}</p>
         <VerificationStatusBadge
           status={
             mockVerification
@@ -275,10 +286,11 @@ export function BookingForm() {
           </legend>
           <Field label="Service" required>
             <ServiceSelect
+              services={services}
               value={form.serviceId}
               onChange={(id) => {
                 update("serviceId", id);
-                const s = getServiceById(id);
+                const s = services.find((svc) => svc.id === id);
                 if (s) update("requestedDuration", s.duration);
               }}
               required

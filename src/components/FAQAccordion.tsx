@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { getEnabledFaqs } from "@/data/faqs";
+import type { FaqItem } from "@/data/faqs";
 import { cn } from "@/lib/utils";
 
-export function FAQAccordion() {
-  const faqs = getEnabledFaqs();
+export function FAQAccordion({ faqs }: { faqs: FaqItem[] }) {
   const [openId, setOpenId] = useState<string | null>(faqs[0]?.id ?? null);
 
   return (

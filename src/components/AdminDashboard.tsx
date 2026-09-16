@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { BookingEnquiry } from "@/lib/booking-types";
@@ -75,14 +74,6 @@ export function AdminDashboard() {
     // Initial load only — Retry button calls load() explicitly.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  async function logout() {
-    await fetch("/api/admin/login", { method: "DELETE" });
-    setBookings([]);
-    setSelectedId(null);
-    router.replace("/admin/login");
-    router.refresh();
-  }
 
   async function savePatch(patch: Partial<BookingEnquiry>) {
     if (!selected) return;
@@ -181,14 +172,6 @@ export function AdminDashboard() {
               </button>
             </div>
           )}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/admin/security" className="btn-secondary">
-            Security log
-          </Link>
-          <button type="button" className="btn-secondary" onClick={logout}>
-            Log Out
-          </button>
         </div>
       </div>
 

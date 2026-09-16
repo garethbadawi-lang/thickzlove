@@ -1,8 +1,10 @@
 import type { BookingFormPayload } from "./booking-types";
-import { getServiceById } from "@/data/services";
+import { getPublicServiceById } from "@/lib/public-content";
 import { venueTypes } from "./booking-types";
 
-export function validateBookingPayload(body: Partial<BookingFormPayload>) {
+export async function validateBookingPayload(
+  body: Partial<BookingFormPayload>,
+) {
   const errors: string[] = [];
 
   const required: Array<keyof BookingFormPayload> = [
@@ -48,7 +50,7 @@ export function validateBookingPayload(body: Partial<BookingFormPayload>) {
     errors.push("Invalid email address.");
   }
 
-  if (body.serviceId && !getServiceById(body.serviceId)) {
+  if (body.serviceId && !(await getPublicServiceById(body.serviceId))) {
     errors.push("Invalid service selection.");
   }
 

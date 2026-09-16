@@ -4,6 +4,7 @@ import { ServiceMenu } from "@/components/ServiceMenu";
 import { ServiceDisclaimer } from "@/components/ServiceDisclaimer";
 import { BookingCTA } from "@/components/BookingCTA";
 import { servicesPageCopy } from "@/data/services";
+import { getSiteContent } from "@/lib/public-content";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -11,7 +12,10 @@ export const metadata: Metadata = {
     "Services and experiences with Love Z Thick. Starting rates shown for arranged time and experiences only.",
 };
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const content = await getSiteContent();
+  const { homepage } = content;
+
   return (
     <>
       <PageIntro
@@ -28,7 +32,10 @@ export default function ServicesPage() {
         </div>
       </div>
 
-      <BookingCTA />
+      <BookingCTA
+        buttonLabel={homepage.mainCtaLabel}
+        href={homepage.mainCtaHref}
+      />
     </>
   );
 }

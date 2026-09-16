@@ -13,7 +13,9 @@ function isExternal(href: string) {
   return href.startsWith("http://") || href.startsWith("https://");
 }
 
-export function LightHeader() {
+type MainCta = { label: string; href: string };
+
+export function LightHeader({ mainCta }: { mainCta: MainCta }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -78,21 +80,21 @@ export function LightHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
-            {isExternal(siteConfig.mainCta.href) ? (
+            {isExternal(mainCta.href) ? (
               <a
-                href={siteConfig.mainCta.href}
+                href={mainCta.href}
                 target="_blank"
                 rel={externalRel()}
                 className="btn-primary hidden sm:inline-flex"
               >
-                {siteConfig.mainCta.label}
+                {mainCta.label}
               </a>
             ) : (
               <Link
-                href={siteConfig.mainCta.href}
+                href={mainCta.href}
                 className="btn-primary hidden sm:inline-flex"
               >
-                {siteConfig.mainCta.label}
+                {mainCta.label}
               </Link>
             )}
             <button
@@ -109,7 +111,11 @@ export function LightHeader() {
         </div>
       </header>
 
-      <MobileNavigation open={open} onClose={() => setOpen(false)} />
+      <MobileNavigation
+        open={open}
+        onClose={() => setOpen(false)}
+        mainCta={mainCta}
+      />
     </>
   );
 }

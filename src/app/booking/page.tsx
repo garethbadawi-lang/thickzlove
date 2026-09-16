@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { PageIntro } from "@/components/PageIntro";
 import { BookingForm } from "@/components/BookingForm";
 import { siteConfig } from "@/data/site-config";
+import { getPublicServices, getSiteContent } from "@/lib/public-content";
 
 export const metadata: Metadata = {
   title: "Request a Booking",
@@ -10,7 +11,12 @@ export const metadata: Metadata = {
     "Submit a booking enquiry with Love Z Thick. Submitting a request does not confirm a booking.",
 };
 
-export default function BookingPage() {
+export default async function BookingPage() {
+  const [services, content] = await Promise.all([
+    getPublicServices(),
+    getSiteContent(),
+  ]);
+
   return (
     <>
       <PageIntro
@@ -27,7 +33,10 @@ export default function BookingPage() {
 
       <div className="mx-auto max-w-3xl px-4 pb-20 sm:px-6">
         <Suspense fallback={<div className="card-light h-96 animate-pulse" />}>
-          <BookingForm />
+          <BookingForm
+            services={services}
+            responseTime={content.settings.responseTime}
+          />
         </Suspense>
       </div>
     </>

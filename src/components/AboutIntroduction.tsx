@@ -1,8 +1,10 @@
 import Image from "next/image";
 import { siteConfig } from "@/data/site-config";
+import { getSiteContent } from "@/lib/public-content";
 
-export function AboutIntroduction() {
-  const { about } = siteConfig;
+export async function AboutIntroduction() {
+  const content = await getSiteContent();
+  const { about } = content;
 
   return (
     <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">

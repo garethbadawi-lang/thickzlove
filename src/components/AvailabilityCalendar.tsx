@@ -3,11 +3,11 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
-  availability,
+  type AvailabilityDay,
   type AvailabilityStatus,
   type TimeWindow,
 } from "@/data/availability";
-import { getEnabledServices } from "@/data/services";
+import type { CompanionService } from "@/data/services";
 import { cn, formatDisplayDate } from "@/lib/utils";
 import { TimeWindowSelect } from "./TimeWindowSelect";
 import Link from "next/link";
@@ -27,7 +27,13 @@ function daysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }
 
-export function AvailabilityCalendar() {
+export function AvailabilityCalendar({
+  days,
+  services,
+}: {
+  days: AvailabilityDay[];
+  services: CompanionService[];
+}) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -36,12 +42,11 @@ export function AvailabilityCalendar() {
   const [serviceId, setServiceId] = useState("");
 
   const byDate = useMemo(() => {
-    const map = new Map(availability.map((d) => [d.date, d]));
+    const map = new Map(days.map((d) => [d.date, d]));
     return map;
-  }, []);
+  }, [days]);
 
   const selected = selectedDate ? byDate.get(selectedDate) : undefined;
-  const services = getEnabledServices();
 
   function prevMonth() {
     if (month === 0) {
@@ -60,7 +65,7 @@ export function AvailabilityCalendar() {
   const firstDow = new Date(year, month, 1).getDay();
   const total = daysInMonth(year, month);
   const blanks = Array.from({ length: firstDow });
-  const days = Array.from({ length: total }, (_, i) => i + 1);
+  const dayNumbers = Array.from({ length: total }, (_, i) => i + 1);
 
   const bookingHref = selectedDate
     ? `/booking?date=${selectedDate}${timeWindow ? `&window=${encodeURIComponent(timeWindow)}` : ""}${serviceId ? `&service=${serviceId}` : ""}`
@@ -106,7 +111,7 @@ export function AvailabilityCalendar() {
           {blanks.map((_, i) => (
             <div key={`b-${i}`} />
           ))}
-          {days.map((day) => {
+          {dayNumbers.map((day) => {
             const iso = `${monthKey(year, month)}-${String(day).padStart(2, "0")}`;
             const entry = byDate.get(iso);
             const status = entry?.enabled ? entry.status : "unavailable";

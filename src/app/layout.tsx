@@ -4,8 +4,10 @@ import { AgeGate } from "@/components/AgeGate";
 import { LightHeader } from "@/components/LightHeader";
 import { LightFooter } from "@/components/LightFooter";
 import { siteConfig } from "@/data/site-config";
-import { getEnabledSocials } from "@/data/socials";
+import { getPublicSocials, getSiteContent } from "@/lib/public-content";
 import "./globals.css";
+
+export const dynamic = "force-dynamic";
 
 const display = Bodoni_Moda({
   subsets: ["latin"],
@@ -81,23 +83,35 @@ export const metadata: Metadata = {
   },
 };
 
-const sameAs = getEnabledSocials().map((s) => s.url);
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: siteConfig.name,
-  alternateName: siteConfig.username,
-  url: siteConfig.seo.siteUrl,
-  description: siteConfig.seo.description,
-  sameAs,
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [content, socials] = await Promise.all([
+    getSiteContent(),
+    getPublicSocials(),
+  ]);
+
+  const mainCta = {
+    label: content.homepage.mainCtaLabel,
+    href: content.homepage.mainCtaHref,
+  };
+
+  const showAnnouncement =
+    content.homepage.announcementEnabled &&
+    Boolean(content.homepage.announcementText.trim());
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: siteConfig.name,
+    alternateName: siteConfig.username,
+    url: siteConfig.seo.siteUrl,
+    description: siteConfig.seo.description,
+    sameAs: socials.map((s) => s.url),
+  };
+
   return (
     <html
       lang="en"
@@ -109,9 +123,17 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <AgeGate />
-        <LightHeader />
+        {showAnnouncement && (
+          <div className="bg-champagne px-4 py-2 text-center text-sm text-burgundy">
+            {content.homepage.announcementText}
+          </div>
+        )}
+        <LightHeader mainCta={mainCta} />
         <main className="relative min-h-[70vh]">{children}</main>
-        <LightFooter />
+        <LightFooter
+          socials={socials}
+          footerMessage={content.settings.footerMessage}
+        />
       </body>
     </html>
   );

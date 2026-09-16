@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/PageIntro";
 import { FAQAccordion } from "@/components/FAQAccordion";
 import { siteConfig } from "@/data/site-config";
+import { getPublicFaqs } from "@/lib/public-content";
 
 export const metadata: Metadata = {
   title: "FAQ",
   description: "Frequently asked questions about booking with Love Z Thick.",
 };
 
-export default function FAQPage() {
+export default async function FAQPage() {
+  const faqs = await getPublicFaqs();
+
   return (
     <>
       <PageIntro
@@ -18,7 +21,7 @@ export default function FAQPage() {
         <p className="text-sm">{siteConfig.companionshipDisclaimer}</p>
       </PageIntro>
       <div className="mx-auto max-w-3xl px-4 pb-20 sm:px-6">
-        <FAQAccordion />
+        <FAQAccordion faqs={faqs} />
       </div>
     </>
   );

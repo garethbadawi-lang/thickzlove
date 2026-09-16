@@ -2,16 +2,28 @@ import Image from "next/image";
 import Link from "next/link";
 import { EditorialHero } from "@/components/EditorialHero";
 import { BookingCTA } from "@/components/BookingCTA";
-import { getFeaturedServices } from "@/data/services";
-import { getUpcomingAvailable } from "@/data/availability";
-import { getFeaturedGalleryImages } from "@/data/gallery";
 import { siteConfig } from "@/data/site-config";
+import {
+  getPublicFeaturedGallery,
+  getPublicFeaturedServices,
+  getPublicUpcomingAvailable,
+  getSiteContent,
+} from "@/lib/public-content";
 import { formatDisplayDate } from "@/lib/utils";
 
-export default function HomePage() {
-  const featured = getFeaturedServices(3);
-  const dates = getUpcomingAvailable(4);
-  const gallery = getFeaturedGalleryImages(4);
+export default async function HomePage() {
+  const [content, featured, dates, gallery] = await Promise.all([
+    getSiteContent(),
+    getPublicFeaturedServices(3),
+    getPublicUpcomingAvailable(4),
+    getPublicFeaturedGallery(4),
+  ]);
+
+  const { homepage, about } = content;
+  const mainCta = {
+    label: homepage.mainCtaLabel,
+    href: homepage.mainCtaHref,
+  };
 
   return (
     <>
@@ -21,12 +33,10 @@ export default function HomePage() {
         <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20">
           <p className="text-eyebrow">Introduction</p>
           <h2 className="mt-3 font-display text-3xl text-espresso sm:text-4xl">
-            Atlanta-Based Creator
+            {homepage.introHeading}
           </h2>
           <p className="mt-5 text-base leading-relaxed text-warmgrey sm:text-lg">
-            Love Z Thick is an Atlanta-based adult entertainer, video vixen,
-            dancer and content creator. Follow her socials and explore her
-            latest content through her official links.
+            {homepage.introText}
           </p>
         </div>
       </section>
@@ -91,13 +101,13 @@ export default function HomePage() {
           <div>
             <p className="text-eyebrow">About</p>
             <h2 className="mt-2 font-display text-3xl text-espresso sm:text-4xl">
-              {siteConfig.about.heading}
+              {about.heading}
             </h2>
             <p className="mt-3 font-script text-3xl text-burgundy">
-              {siteConfig.about.scriptSubtitle}
+              {about.scriptSubtitle}
             </p>
             <p className="mt-5 text-base leading-relaxed text-warmgrey">
-              {siteConfig.about.paragraphs[0]}
+              {about.paragraphs[0]}
             </p>
             <Link href="/about" className="btn-secondary mt-8 inline-flex">
               Read more
@@ -173,7 +183,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <BookingCTA />
+      <BookingCTA buttonLabel={mainCta.label} href={mainCta.href} />
     </>
   );
 }

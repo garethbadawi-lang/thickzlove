@@ -59,7 +59,7 @@ export const socials: SocialLink[] = [
   },
   {
     id: "pornhub",
-    label: "PHUB ❤️",
+    label: "PHUB \u2764\uFE0F",
     url: "https://www.pornhub.com/pornstar/thick-z-love",
     icon: "pornhub-ph",
     enabled: true,

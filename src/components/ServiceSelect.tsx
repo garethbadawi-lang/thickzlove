@@ -1,8 +1,9 @@
 "use client";
 
-import { getEnabledServices } from "@/data/services";
+import type { CompanionService } from "@/data/services";
 
 interface ServiceSelectProps {
+  services: CompanionService[];
   value: string;
   onChange: (value: string) => void;
   id?: string;
@@ -10,13 +11,12 @@ interface ServiceSelectProps {
 }
 
 export function ServiceSelect({
+  services,
   value,
   onChange,
   id = "serviceId",
   required,
 }: ServiceSelectProps) {
-  const services = getEnabledServices();
-
   return (
     <select
       id={id}

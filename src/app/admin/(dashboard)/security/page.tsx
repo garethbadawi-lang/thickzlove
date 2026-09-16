@@ -61,7 +61,7 @@ export default async function AdminSecurityPage() {
             </p>
           </div>
           <Link href="/admin" className="btn-secondary">
-            Back to bookings
+            Back to dashboard
           </Link>
         </div>
 

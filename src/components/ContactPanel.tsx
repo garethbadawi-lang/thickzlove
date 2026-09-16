@@ -1,12 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { siteConfig } from "@/data/site-config";
-import { getEnabledSocials } from "@/data/socials";
+import type { SocialLink } from "@/data/socials";
 import { externalRel } from "@/lib/utils";
 
-export function ContactPanel() {
-  const socials = getEnabledSocials();
+export function ContactPanel({
+  socials,
+  responseTime,
+  privacyNote,
+  successMessage,
+  mainCta,
+}: {
+  socials: SocialLink[];
+  responseTime: string;
+  privacyNote: string;
+  successMessage: string;
+  mainCta: { label: string; href: string };
+}) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -57,20 +67,20 @@ export function ContactPanel() {
       <div>
         <h2 className="font-display text-3xl text-espresso">Official channels</h2>
         <p className="mt-3 text-sm leading-relaxed text-warmgrey">
-          {siteConfig.contact.responseTime}
+          {responseTime}
         </p>
         <p className="mt-4 text-sm leading-relaxed text-warmgrey">
-          {siteConfig.contact.privacyNote}
+          {privacyNote}
         </p>
 
         <div className="mt-8 space-y-4">
           <a
-            href={siteConfig.mainCta.href}
+            href={mainCta.href}
             target="_blank"
             rel={externalRel()}
             className="btn-primary inline-flex"
           >
-            {siteConfig.mainCta.label}
+            {mainCta.label}
           </a>
           {socials.length > 0 ? (
             <ul className="space-y-2">
@@ -153,7 +163,7 @@ export function ContactPanel() {
           aria-hidden
         />
         {status === "ok" && (
-          <p className="text-sm text-available">{siteConfig.contact.successMessage}</p>
+          <p className="text-sm text-available">{successMessage}</p>
         )}
         {error && <p className="text-sm text-burgundy">{error}</p>}
         <button type="submit" className="btn-primary w-full" disabled={busy}>

@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { PageIntro } from "@/components/PageIntro";
 import { AvailabilityCalendar } from "@/components/AvailabilityCalendar";
 import { availabilityCopy } from "@/data/availability";
+import {
+  getPublicAvailability,
+  getPublicServices,
+} from "@/lib/public-content";
 
 export const metadata: Metadata = {
   title: "Availability",
@@ -9,7 +13,12 @@ export const metadata: Metadata = {
     "View indicative availability and continue to a booking enquiry with Love Z Thick.",
 };
 
-export default function AvailabilityPage() {
+export default async function AvailabilityPage() {
+  const [days, services] = await Promise.all([
+    getPublicAvailability(),
+    getPublicServices(),
+  ]);
+
   return (
     <>
       <PageIntro
@@ -20,7 +29,7 @@ export default function AvailabilityPage() {
       </PageIntro>
 
       <div className="mx-auto max-w-6xl px-4 pb-20 sm:px-6">
-        <AvailabilityCalendar />
+        <AvailabilityCalendar days={days} services={services} />
       </div>
     </>
   );

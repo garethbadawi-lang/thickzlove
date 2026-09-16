@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { footerNav } from "@/data/navigation";
 import { siteConfig } from "@/data/site-config";
-import { getEnabledSocials } from "@/data/socials";
+import type { SocialLink } from "@/data/socials";
 import { externalRel } from "@/lib/utils";
 
-export function LightFooter() {
-  const socials = getEnabledSocials();
-
+export function LightFooter({
+  socials,
+  footerMessage,
+}: {
+  socials: SocialLink[];
+  footerMessage: string;
+}) {
   return (
     <footer className="bg-footer text-champagne">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
@@ -17,7 +21,7 @@ export function LightFooter() {
               {siteConfig.username}
             </p>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-champagne/75">
-              {siteConfig.footer.message}
+              {footerMessage}
             </p>
             <p className="mt-4 max-w-lg text-xs leading-relaxed text-champagne/55">
               {siteConfig.companionshipDisclaimer}

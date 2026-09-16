@@ -9,13 +9,18 @@ import { cn, externalRel } from "@/lib/utils";
 interface MobileNavigationProps {
   open: boolean;
   onClose: () => void;
+  mainCta: { label: string; href: string };
 }
 
 function isExternal(href: string) {
   return href.startsWith("http://") || href.startsWith("https://");
 }
 
-export function MobileNavigation({ open, onClose }: MobileNavigationProps) {
+export function MobileNavigation({
+  open,
+  onClose,
+  mainCta,
+}: MobileNavigationProps) {
   const pathname = usePathname();
 
   return (
@@ -67,23 +72,23 @@ export function MobileNavigation({ open, onClose }: MobileNavigationProps) {
         </nav>
 
         <div className="border-t border-border p-4">
-          {isExternal(siteConfig.mainCta.href) ? (
+          {isExternal(mainCta.href) ? (
             <a
-              href={siteConfig.mainCta.href}
+              href={mainCta.href}
               target="_blank"
               rel={externalRel()}
               onClick={onClose}
               className="btn-primary w-full"
             >
-              {siteConfig.mainCta.label}
+              {mainCta.label}
             </a>
           ) : (
             <Link
-              href={siteConfig.mainCta.href}
+              href={mainCta.href}
               onClick={onClose}
               className="btn-primary w-full"
             >
-              {siteConfig.mainCta.label}
+              {mainCta.label}
             </Link>
           )}
         </div>

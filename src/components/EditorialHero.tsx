@@ -1,19 +1,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/data/site-config";
-import { getEnabledSocials } from "@/data/socials";
+import { getSiteContent } from "@/lib/public-content";
+import {
+  NATIVE_COLOR_SOCIAL_ICONS,
+  resolveSocialIcon,
+} from "@/lib/social-links";
 import { externalRel } from "@/lib/utils";
 
 function isExternal(href: string) {
   return href.startsWith("http://") || href.startsWith("https://");
 }
 
-const NATIVE_COLOR_ICONS = new Set(["xvideos-x", "pornhub-ph"]);
-
 function TileBrandIcon({ icon }: { icon: string }) {
-  const src = `/brand-icons/${icon}.svg`;
+  const resolved = resolveSocialIcon(icon);
+  const src = `/brand-icons/${resolved}.svg`;
 
-  if (NATIVE_COLOR_ICONS.has(icon)) {
+  if (NATIVE_COLOR_SOCIAL_ICONS.has(resolved)) {
     return (
       <span
         className="flex size-[22px] shrink-0 items-center justify-center"
@@ -52,8 +55,17 @@ function TileBrandIcon({ icon }: { icon: string }) {
   );
 }
 
-export function EditorialHero() {
-  const socials = getEnabledSocials();
+export async function EditorialHero() {
+  const content = await getSiteContent();
+  const socials = content.socials.filter((s) => s.enabled);
+  const mainCta = {
+    label: content.homepage.mainCtaLabel,
+    href: content.homepage.mainCtaHref,
+  };
+  const secondaryCta = {
+    label: content.homepage.secondaryCtaLabel,
+    href: content.homepage.secondaryCtaHref,
+  };
 
   return (
     <section className="relative overflow-hidden">
@@ -68,44 +80,44 @@ export function EditorialHero() {
 
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:gap-14 lg:py-20">
         <div className="fade-in order-2 lg:order-1">
-          <p className="text-eyebrow">{siteConfig.tagline}</p>
+          <p className="text-eyebrow">{content.homepage.tagline}</p>
           <p className="mt-4 font-display text-4xl leading-[1.1] text-espresso sm:text-5xl lg:text-[3.4rem]">
             {siteConfig.name}
           </p>
           <h1 className="mt-5 font-display text-3xl italic leading-tight text-burgundy sm:text-4xl">
-            {siteConfig.heroHeading}
+            {content.homepage.heroHeading}
           </h1>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-warmgrey sm:text-lg">
-            {siteConfig.heroDescription}
+            {content.homepage.heroDescription}
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            {isExternal(siteConfig.mainCta.href) ? (
+            {isExternal(mainCta.href) ? (
               <a
-                href={siteConfig.mainCta.href}
+                href={mainCta.href}
                 target="_blank"
                 rel={externalRel()}
                 className="btn-primary"
               >
-                {siteConfig.mainCta.label}
+                {mainCta.label}
               </a>
             ) : (
-              <Link href={siteConfig.mainCta.href} className="btn-primary">
-                {siteConfig.mainCta.label}
+              <Link href={mainCta.href} className="btn-primary">
+                {mainCta.label}
               </Link>
             )}
-            {isExternal(siteConfig.secondaryCta.href) ? (
+            {isExternal(secondaryCta.href) ? (
               <a
-                href={siteConfig.secondaryCta.href}
+                href={secondaryCta.href}
                 target="_blank"
                 rel={externalRel()}
                 className="btn-secondary"
               >
-                {siteConfig.secondaryCta.label}
+                {secondaryCta.label}
               </a>
             ) : (
-              <Link href={siteConfig.secondaryCta.href} className="btn-secondary">
-                {siteConfig.secondaryCta.label}
+              <Link href={secondaryCta.href} className="btn-secondary">
+                {secondaryCta.label}
               </Link>
             )}
           </div>
@@ -148,7 +160,7 @@ export function EditorialHero() {
             />
           </div>
           <p className="pointer-events-none absolute -bottom-3 left-4 font-script text-[1.65rem] text-burgundy sm:left-6 sm:text-3xl">
-            {siteConfig.heroScript}
+            {content.homepage.heroScript}
           </p>
         </div>
       </div>
