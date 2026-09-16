@@ -3,7 +3,9 @@ import path from "path";
 import type { BookingEnquiry, EnquiryStatus, VerificationStatus, DepositStatus } from "./booking-types";
 import { createReferenceNumber } from "./utils";
 
-const DATA_DIR = path.join(process.cwd(), ".data");
+const DATA_DIR = process.env.VERCEL
+  ? path.join("/tmp", "thickzlove-bookings")
+  : path.join(process.cwd(), ".data");
 const STORE_PATH = path.join(DATA_DIR, "bookings.json");
 
 async function ensureStore() {
@@ -16,11 +18,16 @@ async function ensureStore() {
 }
 
 export async function readBookings(): Promise<BookingEnquiry[]> {
-  await ensureStore();
-  const raw = await fs.readFile(STORE_PATH, "utf8");
   try {
-    return JSON.parse(raw) as BookingEnquiry[];
+    await ensureStore();
+    const raw = await fs.readFile(STORE_PATH, "utf8");
+    try {
+      return JSON.parse(raw) as BookingEnquiry[];
+    } catch {
+      return [];
+    }
   } catch {
+    // Serverless FS may be unavailable; never crash the admin dashboard.
     return [];
   }
 }

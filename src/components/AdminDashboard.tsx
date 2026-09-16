@@ -48,14 +48,25 @@ export function AdminDashboard() {
   );
 
   async function load() {
-    const res = await fetch("/api/admin/bookings");
-    if (res.status === 401) {
-      router.replace("/admin/login");
-      return;
+    try {
+      const res = await fetch("/api/admin/bookings");
+      if (res.status === 401) {
+        router.replace("/admin/login");
+        return;
+      }
+      if (!res.ok) {
+        setError("Unable to load bookings.");
+        setBookings([]);
+        return;
+      }
+      const data = (await res.json()) as { bookings: BookingEnquiry[] };
+      setBookings(data.bookings || []);
+    } catch {
+      setError("Unable to load bookings.");
+      setBookings([]);
+    } finally {
+      setLoading(false);
     }
-    const data = (await res.json()) as { bookings: BookingEnquiry[] };
-    setBookings(data.bookings || []);
-    setLoading(false);
   }
 
   useEffect(() => {
@@ -151,6 +162,7 @@ export function AdminDashboard() {
           <p className="mt-1 text-sm text-warmgrey">
             Identity documents are never stored or displayed here.
           </p>
+          {error && <p className="mt-2 text-sm text-burgundy">{error}</p>}
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href="/admin/security" className="btn-secondary">
