@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import { siteConfig } from "@/data/site-config";
 import { getEnabledSocials } from "@/data/socials";
 import { externalRel } from "@/lib/utils";
@@ -17,7 +16,7 @@ function TileBrandIcon({ icon }: { icon: string }) {
   if (NATIVE_COLOR_ICONS.has(icon)) {
     return (
       <span
-        className="flex size-6 shrink-0 items-center justify-center"
+        className="flex size-[22px] shrink-0 items-center justify-center"
         aria-hidden
       >
         <img
@@ -33,7 +32,7 @@ function TileBrandIcon({ icon }: { icon: string }) {
 
   return (
     <span
-      className="flex size-6 shrink-0 items-center justify-center"
+      className="flex size-[22px] shrink-0 items-center justify-center"
       aria-hidden
     >
       <span
@@ -112,7 +111,7 @@ export function EditorialHero() {
           </div>
 
           {socials.length > 0 && (
-            <ul className="mt-6 grid w-full grid-cols-2 gap-3 sm:grid-cols-4">
+            <ul className="mt-6 grid w-full grid-cols-2 gap-3 lg:grid-cols-4">
               {socials.map((s) => (
                 <li key={s.id}>
                   <a
@@ -123,10 +122,6 @@ export function EditorialHero() {
                   >
                     <TileBrandIcon icon={s.icon} />
                     <span className="whitespace-nowrap">{s.label}</span>
-                    <ArrowUpRight
-                      className="ml-auto size-3.5 shrink-0 opacity-55"
-                      aria-hidden
-                    />
                   </a>
                 </li>
               ))}

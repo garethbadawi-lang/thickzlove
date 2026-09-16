@@ -34,7 +34,7 @@ export const siteConfig = {
     languages: "Public communications in English.",
     generalAvailability: "Updates and content shared through her official links.",
   },
-  profileImage: "/images/love-z-thick-hero.png",
+  profileImage: "/images/love-z-thick-about.png",
   heroImage: "/images/love-z-thick-hero.png",
   ogImage: "/images/love-z-thick-og.svg",
   ageGate: {

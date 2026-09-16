@@ -67,7 +67,12 @@
   }
 
   .link-tile {
-    @apply flex h-10 w-full items-center gap-2 rounded-[10px] border border-burgundy/30 bg-champagne px-3.5 text-[12px] font-medium tracking-wide text-burgundy shadow-[0_2px_8px_rgba(42,33,30,0.05)] transition duration-200 ease-out sm:h-11 sm:text-[13px];
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding-left: 14px;
+    padding-right: 14px;
+    @apply h-10 w-full rounded-[10px] border border-burgundy/30 bg-champagne text-[12px] font-medium tracking-wide text-burgundy shadow-[0_2px_8px_rgba(42,33,30,0.05)] transition duration-200 ease-out sm:h-11 sm:text-[13px];
   }
 
   .link-tile:hover {

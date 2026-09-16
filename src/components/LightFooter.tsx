@@ -62,8 +62,29 @@ export function LightFooter() {
         </div>
 
         <div className="mt-12 border-t border-white/10 pt-6 text-xs text-champagne/50">
-          <p>{siteConfig.footer.copyright}</p>
-          <p className="mt-2">{siteConfig.footer.trademark}</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+            <div>
+              <p>{siteConfig.footer.copyright}</p>
+              <p className="mt-2">{siteConfig.footer.trademark}</p>
+            </div>
+            <p className="text-[12px] leading-relaxed text-champagne/65 sm:text-right">
+              <span className="block">Site created by:</span>
+              <a
+                href="https://x.com/sammy4354"
+                target="_blank"
+                rel={externalRel()}
+                className="mt-1 block text-champagne/75 transition hover:text-gold hover:underline underline-offset-2"
+              >
+                X/Twitter: @sammy4354
+              </a>
+              <a
+                href="mailto:garethbadawi@gmail.com"
+                className="mt-0.5 block text-champagne/75 transition hover:text-gold hover:underline underline-offset-2"
+              >
+                Email: garethbadawi@gmail.com
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
