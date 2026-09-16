@@ -39,7 +39,9 @@ export type ParsedClientInfo = {
   region: string | null;
 };
 
-const DATA_DIR = path.join(process.cwd(), ".data");
+const DATA_DIR = process.env.VERCEL
+  ? path.join("/tmp", "thickzlove-admin-audit")
+  : path.join(process.cwd(), ".data");
 const STORE_PATH = path.join(DATA_DIR, "admin-audit-log.json");
 const MAX_ENTRIES = 500;
 
@@ -53,8 +55,8 @@ async function ensureStore() {
 }
 
 async function readRaw(): Promise<AdminAuditEntry[]> {
-  await ensureStore();
   try {
+    await ensureStore();
     const raw = await fs.readFile(STORE_PATH, "utf8");
     const parsed = JSON.parse(raw) as AdminAuditEntry[];
     return Array.isArray(parsed) ? parsed : [];
@@ -158,36 +160,42 @@ export async function appendAdminAuditEvent(input: {
   success: boolean;
   client: ParsedClientInfo;
   sessionToken?: string | null;
-}): Promise<AdminAuditEntry> {
-  const entries = await readRaw();
-  const sessionHash = input.sessionToken
-    ? hashSessionToken(input.sessionToken)
-    : null;
+}): Promise<AdminAuditEntry | null> {
+  try {
+    const entries = await readRaw();
+    const sessionHash = input.sessionToken
+      ? hashSessionToken(input.sessionToken)
+      : null;
 
-  const newIpOrDevice =
-    input.event === "ADMIN_LOGIN_SUCCESS"
-      ? isNewIpOrDevice(entries, input.client)
-      : false;
+    const newIpOrDevice =
+      input.event === "ADMIN_LOGIN_SUCCESS"
+        ? isNewIpOrDevice(entries, input.client)
+        : false;
 
-  const entry: AdminAuditEntry = {
-    id: crypto.randomUUID(),
-    timestamp: new Date().toISOString(),
-    event: input.event,
-    success: input.success,
-    ip: input.client.ip,
-    userAgent: input.client.userAgent.slice(0, 500),
-    browser: input.client.browser,
-    os: input.client.os,
-    device: input.client.device,
-    country: input.client.country,
-    region: input.client.region,
-    sessionHash,
-    newIpOrDevice,
-  };
+    const entry: AdminAuditEntry = {
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      event: input.event,
+      success: input.success,
+      ip: input.client.ip,
+      userAgent: input.client.userAgent.slice(0, 500),
+      browser: input.client.browser,
+      os: input.client.os,
+      device: input.client.device,
+      country: input.client.country,
+      region: input.client.region,
+      sessionHash,
+      newIpOrDevice,
+    };
 
-  const next = [entry, ...entries].slice(0, MAX_ENTRIES);
-  await writeRaw(next);
-  return entry;
+    const next = [entry, ...entries].slice(0, MAX_ENTRIES);
+    await writeRaw(next);
+    return entry;
+  } catch {
+    // Never block authentication if audit storage is unavailable (e.g. cold serverless FS).
+    console.error("[admin-audit] failed to persist event", input.event);
+    return null;
+  }
 }
 
 export async function readAdminAuditLog(limit = 100): Promise<AdminAuditEntry[]> {
