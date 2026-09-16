@@ -96,8 +96,14 @@ export async function getSiteByKey(siteKey: string): Promise<SiteRecord | null> 
 }
 
 export async function isBootstrapMigrated(siteKey = SITE_KEY): Promise<boolean> {
-  const site = await getSiteByKey(siteKey);
-  return Boolean(site?.bootstrapMigratedAt);
+  try {
+    const site = await getSiteByKey(siteKey);
+    return Boolean(site?.bootstrapMigratedAt);
+  } catch (err) {
+    console.error("[site-access] isBootstrapMigrated failed", err);
+    // Fail open for starter login so a DB blip does not lock out bootstrap.
+    return false;
+  }
 }
 
 export async function setBootstrapPending(input: {
