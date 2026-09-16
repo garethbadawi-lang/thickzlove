@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { BookingEnquiry } from "@/lib/booking-types";
 
@@ -34,12 +36,11 @@ const depositStatuses = [
 ] as const;
 
 export function AdminDashboard() {
-  const [password, setPassword] = useState("");
-  const [authed, setAuthed] = useState(false);
+  const router = useRouter();
   const [bookings, setBookings] = useState<BookingEnquiry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const selected = useMemo(
     () => bookings.find((b) => b.id === selectedId) || null,
@@ -49,66 +50,41 @@ export function AdminDashboard() {
   async function load() {
     const res = await fetch("/api/admin/bookings");
     if (res.status === 401) {
-      setAuthed(false);
+      router.replace("/admin/login");
       return;
     }
     const data = (await res.json()) as { bookings: BookingEnquiry[] };
     setBookings(data.bookings || []);
-    setAuthed(true);
+    setLoading(false);
   }
 
   useEffect(() => {
     void load();
   }, []);
 
-  async function login(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      if (!res.ok) {
-        setError("Invalid credentials.");
-        return;
-      }
-      setPassword("");
-      await load();
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function logout() {
     await fetch("/api/admin/login", { method: "DELETE" });
-    setAuthed(false);
     setBookings([]);
     setSelectedId(null);
+    router.replace("/admin/login");
+    router.refresh();
   }
 
   async function savePatch(patch: Partial<BookingEnquiry>) {
     if (!selected) return;
-    setBusy(true);
-    try {
-      const res = await fetch("/api/admin/bookings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selected.id, ...patch }),
-      });
-      if (!res.ok) {
-        setError("Unable to update booking.");
-        return;
-      }
-      const data = (await res.json()) as { booking: BookingEnquiry };
-      setBookings((prev) =>
-        prev.map((b) => (b.id === data.booking.id ? data.booking : b)),
-      );
-    } finally {
-      setBusy(false);
+    const res = await fetch("/api/admin/bookings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: selected.id, ...patch }),
+    });
+    if (!res.ok) {
+      setError("Unable to update booking.");
+      return;
     }
+    const data = (await res.json()) as { booking: BookingEnquiry };
+    setBookings((prev) =>
+      prev.map((b) => (b.id === data.booking.id ? data.booking : b)),
+    );
   }
 
   async function removeSelected() {
@@ -157,26 +133,11 @@ export function AdminDashboard() {
     URL.revokeObjectURL(url);
   }
 
-  if (!authed) {
+  if (loading) {
     return (
-      <form onSubmit={login} className="mx-auto max-w-md card-light space-y-4 p-6">
-        <h1 className="font-display text-3xl text-espresso">Admin sign in</h1>
-        <p className="text-sm text-warmgrey">
-          Booking dashboard is private. Set ADMIN_PASSWORD in your environment.
-        </p>
-        <input
-          type="password"
-          className="input-light"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Admin password"
-          required
-        />
-        {error && <p className="text-sm text-burgundy">{error}</p>}
-        <button type="submit" className="btn-primary w-full" disabled={busy}>
-          Sign in
-        </button>
-      </form>
+      <div className="mx-auto max-w-6xl px-4 py-16 text-sm text-warmgrey sm:px-6">
+        Loading dashboard…
+      </div>
     );
   }
 
@@ -191,9 +152,14 @@ export function AdminDashboard() {
             Identity documents are never stored or displayed here.
           </p>
         </div>
-        <button type="button" className="btn-secondary" onClick={logout}>
-          Sign out
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/security" className="btn-secondary">
+            Security log
+          </Link>
+          <button type="button" className="btn-secondary" onClick={logout}>
+            Log Out
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">

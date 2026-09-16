@@ -45,7 +45,7 @@ export const legalContent = {
   },
   privacy: {
     title: "Privacy Policy",
-    lastUpdated: "August 2026",
+    lastUpdated: "September 2026",
     notice:
       "This page is a starting template and should be legally reviewed before publication.",
     sections: [
@@ -66,8 +66,12 @@ export const legalContent = {
         body: "When you confirm your age, a simple confirmation value may be stored in your browser’s local storage. This value stays on your device.",
       },
       {
+        heading: "Administrative Access Security Logs",
+        body: "When an authorised administrator signs in to the private admin area, the site may record security audit logs for account protection and fraud prevention. Those logs may include the time of the attempt, whether it succeeded or failed, the source IP address, browser and device information derived from the request User-Agent, and a coarse country or region only when that information is already provided by the hosting platform. Passwords, password hashes and session secrets are never written to these logs. This monitoring applies to administrative access only and is not used to track ordinary website visitors.",
+      },
+      {
         heading: "Retention",
-        body: "Enquiry records should be retained only as long as needed to manage the request, then deleted or securely archived. Administrators may delete personal data when it is no longer required.",
+        body: "Enquiry records should be retained only as long as needed to manage the request, then deleted or securely archived. Administrators may delete personal data when it is no longer required. Administrative security logs are retained only as needed for account-security review.",
       },
       {
         heading: "Your Rights",

@@ -32,7 +32,7 @@ yarn-error.log*
 .env*.local
 .env
 
-# private booking store
+# private server-only data (bookings, admin audit logs)
 .data/
 
 # typescript
