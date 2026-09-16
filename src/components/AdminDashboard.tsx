@@ -72,6 +72,8 @@ export function AdminDashboard() {
 
   useEffect(() => {
     void load();
+    // Initial load only — Retry button calls load() explicitly.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function logout() {

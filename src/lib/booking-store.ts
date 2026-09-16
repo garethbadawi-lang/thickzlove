@@ -17,7 +17,7 @@ const BLOB_PATHNAME = "data/bookings.json";
  * Local: .data/bookings.json
  * Vercel: private Vercel Blob (durable across deploys/instances)
  */
-function useBlobStore() {
+function isBlobStorageEnabled() {
   return (
     process.env.VERCEL === "1" &&
     Boolean(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID)
@@ -81,14 +81,14 @@ async function writeBookingsToBlob(bookings: BookingEnquiry[]) {
 }
 
 export async function readBookings(): Promise<BookingEnquiry[]> {
-  if (useBlobStore()) {
+  if (isBlobStorageEnabled()) {
     return readBookingsFromBlob();
   }
   return readBookingsFromFile();
 }
 
 async function writeBookings(bookings: BookingEnquiry[]) {
-  if (useBlobStore()) {
+  if (isBlobStorageEnabled()) {
     await writeBookingsToBlob(bookings);
     return;
   }
