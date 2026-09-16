@@ -60,6 +60,7 @@ export function AdminDashboard() {
         return;
       }
       const data = (await res.json()) as { bookings: BookingEnquiry[] };
+      setError(null);
       setBookings(data.bookings || []);
     } catch {
       setError("Unable to load bookings.");
@@ -162,7 +163,22 @@ export function AdminDashboard() {
           <p className="mt-1 text-sm text-warmgrey">
             Identity documents are never stored or displayed here.
           </p>
-          {error && <p className="mt-2 text-sm text-burgundy">{error}</p>}
+          {error && (
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <p className="text-sm text-burgundy">{error}</p>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  setLoading(true);
+                  setError(null);
+                  void load();
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href="/admin/security" className="btn-secondary">
